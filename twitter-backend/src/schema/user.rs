@@ -6,7 +6,7 @@ pub struct UserModel {
     user_name: String, 
     email: String,
     created_stamp: Option<chrono::DateTime<chrono::Utc>>,
-    dob_id: usize,
+    dob: String,
     profile_id: usize,
     password: String,
 }
