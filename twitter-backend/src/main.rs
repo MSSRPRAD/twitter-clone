@@ -1,47 +1,39 @@
-use actix_web::{App, HttpServer};
-use twitter_backend::handlers::{
-    about_handler::about, 
-    auth_handler::{login, register}, 
-    index_handler::index, 
-    timeline_handler::timeline,
-    profile_handler::{tweets, tweets_images, tweets_likes, tweets_with_replies},
-    message_handler::messages,
-    notification_handler::notifications,
-    bookmark_handler::bookmarks,
-    explore_handler::explore,
-    tweet_handler::{view_tweet, view_tweet_likes, view_quote_tweets, tweet_analytics}
-};
+use actix_web::{App, HttpServer, web, middleware::Logger};
+use sqlx::mysql::{MySqlPoolOptions};
+// Import the AppState type
+use twitter_backend::appstate::{AppState, handler};
+use dotenv::dotenv;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv::dotenv().ok();
+    dotenv().ok();
     
-    println!("Backend Server started successfully!");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = match MySqlPoolOptions::new()
+        .max_connections(10)
+        .connect(&database_url)
+        .await
+    {
+        Ok(pool) => {
+            println!("✅Connection to the database is successful!");
+            pool
+        }
+        Err(err) => {
+            println!("🔥 Failed to connect to the database: {:?}", err);
+            std::process::exit(1);
+        }
+    };
+
+    println!("🚀 Server started successfully");
     println!("Serving on 127.0.0.1:8000");
 
-    HttpServer::new(
-        move || {
-            App::new()
-            .service(index)
-            .service(about)
-            .service(login)
-            .service(register)
-            .service(timeline)
-            .service(tweets)
-            .service(tweets_images)
-            .service(tweets_likes)
-            .service(tweets_with_replies)
-            .service(notifications)
-            .service(messages)
-            .service(bookmarks)
-            .service(explore)
-            .service(view_tweet)
-            .service(view_tweet_likes)
-            .service(view_quote_tweets)
-            .service(tweet_analytics)
-        }
-    )
-    .bind("127.0.0.1:8000")?
+    HttpServer::new(move || {
+        App::new()
+        .app_data(web::Data::new(AppState { db: pool.clone() }))
+        .configure(handler::config)
+        .wrap(Logger::default())
+    })
+    .bind(("127.0.0.1", 8000))?
     .run()
     .await
 
