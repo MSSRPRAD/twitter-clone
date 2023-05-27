@@ -9,9 +9,10 @@ edition = "2021"
 actix-web = "4.3.1"
 dotenv = "0.15.0"
 serde = "1.0.163"
+serde_derive = "1.0.163"
 serde_json = "1.0.96"
-sqlx = { version = "0.5", features = ["runtime-actix-native-tls", "macros", "mysql"] }
-
+sqlx = { version = "0.5", features = ["runtime-actix-native-tls", "macros", "mysql","chrono", "uuid"] }
+chrono = { version = "0.4.24", features = ["serde"] }
 # Our library
 [lib]
 path = "src/lib.rs"
