@@ -2,7 +2,7 @@ version: '3'
 services:
   mysql:
     image: mysql:latest
-    container_name: mysql
+    container_name: mysql-twitterdb
     env_file:
       - ./.env
     ports:
