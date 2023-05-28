@@ -17,7 +17,7 @@ pub struct UserModel {
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize)]
 pub struct LoginUserSchema {
-    pub email: String,
+    pub username: String,
     pub password: String,
 }
 #[allow(non_snake_case)]

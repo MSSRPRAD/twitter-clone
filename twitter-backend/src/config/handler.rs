@@ -1,5 +1,5 @@
 use actix_web::web;
-use crate::routes::auth_routes::{register_post, login_post, logout};
+use crate::routes::auth_routes::{register_post, login_post, logout, get_me_handler};
 use crate::routes::{
     about_routes::about, 
     auth_routes::{login, register, allusers}, 
@@ -35,6 +35,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
     .service(allusers)
     .service(register_post)
     .service(login_post)
+    .service(get_me_handler)
     .service(logout);
     conf.service(scope);
 }

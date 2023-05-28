@@ -36,6 +36,8 @@ async fn main() -> std::io::Result<()> {
     println!("🚀 Server started successfully");
     println!("Serving on 127.0.0.1:8000");
 
+    
+
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000")

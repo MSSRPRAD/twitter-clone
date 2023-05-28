@@ -16,13 +16,15 @@ pub struct TokenClaims {
 }
 
 pub struct JwtMiddleware {
-    pub user_id: uuid::Uuid,
+    pub user_id: i32,
 }
 
+// Pure Magic. Don't touch!!!!
 impl FromRequest for JwtMiddleware {
     type Error = ActixWebError;
     type Future = Ready<Result<Self, Self::Error>>;
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
+        // println!("Inside from_request()");
         let data = req.app_data::<web::Data<AppState>>().unwrap();
 
         let token = req
@@ -33,7 +35,8 @@ impl FromRequest for JwtMiddleware {
                     .get(http::header::AUTHORIZATION)
                     .map(|h| h.to_str().unwrap().split_at(7).1.to_string())
             });
-
+        // Reached here
+        println!("token: {:?}", token);
         if token.is_none() {
             let json_error = ErrorResponse {
                 status: "fail".to_string(),
@@ -56,10 +59,12 @@ impl FromRequest for JwtMiddleware {
                 return ready(Err(ErrorUnauthorized(json_error)));
             }
         };
-
-        let user_id = uuid::Uuid::parse_str(claims.sub.as_str()).unwrap();
+        println!("claims: {:?}", claims);
+        println!("parsing\n{:?}", uuid::Uuid::parse_str(claims.sub.as_str()));
+        let user_id : i32 = claims.sub.as_str().to_owned().parse().unwrap();
+        println!("user_id: {}", user_id);
         req.extensions_mut()
-            .insert::<uuid::Uuid>(user_id.to_owned());
+            .insert::<i32>(user_id.to_owned());
 
         ready(Ok(JwtMiddleware { user_id }))
     }
