@@ -15,13 +15,14 @@ pub async fn register() -> HttpResponse {
     HttpResponse::Ok().body("This will soon be a registration page!")
 }
 
-#[get("/users")]
-pub async fn users(data: web::Data<AppState>) -> HttpResponse {
-
+#[get("/users/all")]
+pub async fn allusers(data: web::Data<AppState>) -> HttpResponse {
+    
     let users: Vec<UserModel> = sqlx::query_as!(
         UserModel, 
         r#"SELECT 
-            USER_ID, 
+            USER_ID,
+            ROLE_ID, 
             USERNAME, 
             EMAIL, 
             CREATED_AT, 
@@ -45,7 +46,8 @@ pub async fn users(data: web::Data<AppState>) -> HttpResponse {
 
     let json_response = serde_json::json!({
         "status": "success",
-        "results": user_responses.len()
+        "results": user_responses.len(),
+        "users": user_responses
     });
     HttpResponse::Ok().json(json_response)
 }

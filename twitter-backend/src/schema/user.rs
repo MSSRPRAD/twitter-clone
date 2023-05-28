@@ -2,6 +2,7 @@ use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
 pub struct UserModel {
+    pub ROLE_ID: i32,
     pub USER_ID: i32, 
     pub USERNAME: String, 
     pub EMAIL: String,
