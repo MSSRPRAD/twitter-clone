@@ -1,6 +1,7 @@
 {
     "rust-analyzer.linkedProjects": [
         "./twitter-backend/Cargo.toml",
+        "./twitter-backend/Cargo.toml",
         "./twitter-backend/Cargo.toml"
     ]
 }

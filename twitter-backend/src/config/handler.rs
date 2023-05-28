@@ -1,7 +1,8 @@
 use actix_web::web;
+use crate::routes::auth_routes::{register_post, login_post, logout};
 use crate::routes::{
     about_routes::about, 
-    auth_routes::{login, register}, 
+    auth_routes::{login, register, allusers}, 
     index_routes::index, 
     timeline_routes::timeline,
     profile_routes::{tweets, tweets_images, tweets_likes, tweets_with_replies},
@@ -13,7 +14,7 @@ use crate::routes::{
 };
 
 pub fn config(conf: &mut web::ServiceConfig) {
-    let scope = web::scope("/api")
+    let scope = web::scope("")
     .service(index)
     .service(about)
     .service(login)
@@ -30,6 +31,10 @@ pub fn config(conf: &mut web::ServiceConfig) {
     .service(view_tweet)
     .service(view_tweet_likes)
     .service(view_quote_tweets)
-    .service(tweet_analytics);
+    .service(tweet_analytics)
+    .service(allusers)
+    .service(register_post)
+    .service(login_post)
+    .service(logout);
     conf.service(scope);
 }
