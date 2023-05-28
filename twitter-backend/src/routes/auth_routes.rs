@@ -33,7 +33,6 @@ async fn register_post(
     body: web::Json<RegisterUserSchema>,
     data: web::Data<AppState>,
 ) -> HttpResponse {
-    let transaction = data.db.begin().await;
     println!("reached /register handler");
     let exists: bool = sqlx::query("SELECT EXISTS(SELECT 1 FROM USERS WHERE email = ?)")
         .bind(body.email.to_owned())
@@ -72,7 +71,6 @@ async fn register_post(
     )
     .execute(&data.db)
     .await;
-    _ = transaction.unwrap().commit().await;
     println!("user INSERTED!");
     let query_result = sqlx::query_as!(UserModel, 
         "
@@ -90,7 +88,7 @@ async fn register_post(
             USERS
         WHERE 
             (role_id, username, email, password, dob) = (?, ?, ?, ?, ?);", 
-            1,
+            body.role_id,
             body.username.to_string(),
             body.email.to_string().to_lowercase(),
             hashed_password,
