@@ -33,10 +33,10 @@ async fn register_post(
     body: web::Json<RegisterUserSchema>,
     data: web::Data<AppState>,
 ) -> HttpResponse {
-    let mut transaction = data.db.begin().await;
+    let transaction = data.db.begin().await;
     println!("reached /register handler");
-    let exists: bool = sqlx::query("SELECT EXISTS(SELECT 1 FROM USERS WHERE EMAIL = ?)")
-        .bind(body.EMAIL.to_owned())
+    let exists: bool = sqlx::query("SELECT EXISTS(SELECT 1 FROM USERS WHERE email = ?)")
+        .bind(body.email.to_owned())
         .fetch_one(&data.db)
         .await
         .unwrap()
@@ -51,52 +51,54 @@ async fn register_post(
 
     let salt = SaltString::generate(&mut OsRng);
     let hashed_password = Argon2::default()
-        .hash_password(body.PASSWORD.as_bytes(), &salt)
+        .hash_password(body.password.as_bytes(), &salt)
         .expect("Error while hashing password")
         .to_string();
     println!("What backend recieved: {:?}", body);
-    // {"ROLE_ID": 0, "EMAIL": "admin@admin.com","USERNAME": "Admin","PASSWORD": "password123","DOB": "13/01/2003"}
+    // {"role_id": 0, "email": "admin@admin.com","username": "Admin","password": "password123","dob": "13/01/2003"}
     // Reached here; user does not exist
     let _insert_result = sqlx::query_as!(
         UserModel,
         "INSERT INTO USERS 
-            (ROLE_ID, USERNAME, PASSWORD, EMAIL, DOB) 
+            (role_id, name, username, password, email, dob) 
         VALUES 
-            (?, ?, ?, ?, ?);",
-        0,
-        body.USERNAME.to_string(),
-        body.EMAIL.to_string().to_lowercase(),
+            (?, ?, ?, ?, ?, ?);",
+        body.role_id,
+        body.name.to_string(),
+        body.username.to_string(),
         hashed_password,
-        body.DOB.to_string(),
+        body.email.to_string().to_lowercase(),
+        body.dob.to_string(),
     )
     .execute(&data.db)
     .await;
-    transaction.unwrap().commit().await;
-    println!("USER INSERTED!");
+    _ = transaction.unwrap().commit().await;
+    println!("user INSERTED!");
     let query_result = sqlx::query_as!(UserModel, 
         "
         SELECT 
-            USER_ID, 
-            ROLE_ID, 
-            USERNAME, 
-            EMAIL, 
-            CREATED_AT, 
-            DOB, 
-            PROFILE_ID, 
-            PASSWORD
+            user_id, 
+            role_id, 
+            username,
+            name, 
+            email, 
+            created_at, 
+            dob, 
+            profile_id, 
+            password
         FROM 
             USERS
         WHERE 
-            (ROLE_ID, USERNAME, EMAIL, PASSWORD, DOB) = (?, ?, ?, ?, ?);", 
-            0,
-            body.USERNAME.to_string(),
-            body.EMAIL.to_string().to_lowercase(),
+            (role_id, username, email, password, dob) = (?, ?, ?, ?, ?);", 
+            1,
+            body.username.to_string(),
+            body.email.to_string().to_lowercase(),
             hashed_password,
-            body.DOB.to_string()
+            body.dob.to_string()
         )
         .fetch_one(&data.db)
         .await;
-    println!("USER Queried from db: {:?}", query_result);
+    println!("user Queried from db: {:?}", query_result);
     match query_result {
         Ok(user) => {
             let user_response = serde_json::json!({"status": "success","data": serde_json::json!({
@@ -117,16 +119,16 @@ async fn login_post(
     body: web::Json<LoginUserSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-    let user = sqlx::query_as!(UserModel, "SELECT * FROM USERS WHERE EMAIL = ?", body.EMAIL)
+    let user = sqlx::query_as!(UserModel, "SELECT * FROM USERS WHERE email = ?", body.email)
         .fetch_optional(&data.db)
         .await
         .unwrap()
         .unwrap();
 
-    let parsed_hash = PasswordHash::new(&user.PASSWORD).unwrap();
+    let parsed_hash = PasswordHash::new(&user.password).unwrap();
 
     let is_valid = Argon2::default()
-        .verify_password(body.PASSWORD.as_bytes(), &parsed_hash)
+        .verify_password(body.password.as_bytes(), &parsed_hash)
         .map_or(false, |_| true);
 
     if !is_valid {
@@ -138,7 +140,7 @@ async fn login_post(
     let iat = now.timestamp() as usize;
     let exp = (now + Duration::minutes(60)).timestamp() as usize;
     let claims: TokenClaims = TokenClaims {
-        sub: user.USER_ID.to_string(),
+        sub: user.user_id.to_string(),
         exp,
         iat,
     };
@@ -172,18 +174,19 @@ pub async fn allusers(data: web::Data<AppState>) -> HttpResponse {
     let users: Vec<UserModel> = sqlx::query_as!(
         UserModel, 
         r#"SELECT 
-            USER_ID,
-            ROLE_ID, 
-            USERNAME, 
-            EMAIL, 
-            CREATED_AT, 
-            DOB, 
-            PROFILE_ID, 
-            PASSWORD 
+            user_id,
+            name,
+            role_id, 
+            username, 
+            email, 
+            created_at, 
+            dob, 
+            profile_id, 
+            password 
         FROM 
             USERS
         ORDER BY
-            USER_ID
+            user_ID
         ;"#
     )
     .fetch_all(&data.db)
