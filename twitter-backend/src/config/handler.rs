@@ -5,7 +5,7 @@ use crate::routes::{
     auth_routes::{login, register, allusers}, 
     index_routes::index, 
     timeline_routes::timeline,
-    profile_routes::{tweets, tweets_images, tweets_likes, tweets_with_replies},
+    profile_routes::{tweets, tweets_images, tweets_likes, tweets_with_replies, profile_username},
     message_routes::messages,
     notification_routes::notifications,
     bookmark_routes::bookmarks,
@@ -36,6 +36,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
     .service(register_post)
     .service(login_post)
     .service(get_me_handler)
+    .service(profile_username)
     .service(logout);
     conf.service(scope);
 }

@@ -237,10 +237,8 @@ async fn get_me_handler(
     _: middleware::JwtMiddleware,
 ) -> impl Responder {
 
-    println!("reached /users/me!");
     let ext = req.extensions();
     let user_id = ext.get::<i32>().unwrap();
-    println!("user_id: {:?}", user_id);
     let user = sqlx::query_as!(UserModel, "
     SELECT 
         user_id,
@@ -264,7 +262,6 @@ async fn get_me_handler(
             "user": make_user_model_response(&user)
         })
     });
-    println!("json response generated: {}", json_response);
 
     HttpResponse::Ok().json(json_response)
 }

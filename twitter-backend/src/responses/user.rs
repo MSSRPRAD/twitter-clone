@@ -6,6 +6,7 @@ use crate::schema::user::UserModel;
 pub struct UserModelResponse {
     pub role_id: i32,
     pub user_id: i32,
+    pub name: String,
     pub username: String, 
     pub email: String,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -17,7 +18,8 @@ pub struct UserModelResponse {
 pub fn make_user_model_response(user: &UserModel) -> UserModelResponse {
     UserModelResponse {
         role_id: user.role_id.to_owned(),
-        user_id: user.user_id.to_owned(), 
+        user_id: user.user_id.to_owned(),
+        name: user.name.to_owned(),
         username: user.username.to_owned(), 
         email: user.email.to_owned(),
         created_at: user.created_at.to_owned(),

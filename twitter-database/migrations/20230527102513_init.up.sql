@@ -25,6 +25,17 @@ CREATE TABLE IF NOT EXISTS USERS (
     FOREIGN KEY (profile_id) REFERENCES PROFILES(profile_id)
 );
 
+
+CREATE TABLE IF NOT EXISTS TWEETS (
+    tweet_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id),
+    parent_id INT,
+    FOREIGN KEY (parent_id) REFERENCES TWEETS(tweet_id),
+    content VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 /*
 USER = 1
 ADMIN = 2
