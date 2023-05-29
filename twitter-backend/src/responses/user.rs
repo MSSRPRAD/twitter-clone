@@ -1,7 +1,6 @@
 use serde_derive::{Deserialize, Serialize};
 use crate::schema::user::UserModel;
 
-#[allow(non_snake_case)]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UserModelResponse {
     pub role_id: i32,

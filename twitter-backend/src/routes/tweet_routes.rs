@@ -1,5 +1,6 @@
 use actix_web::{get, HttpResponse, HttpRequest, web};
 use crate::config::AppState;
+use crate::responses::tweet::make_tweet_model_response;
 use crate::schema::{tweet::TweetModel, user::UserModel};
 /*
 pub tweet_id: i32,
@@ -13,8 +14,9 @@ pub async fn view_tweet(
     req: HttpRequest,
     data: web::Data<AppState>,
 ) -> HttpResponse {
-    let username: String = req.path().split('/').into_iter().nth(2).unwrap().to_string();
-    let tweet_id: i32 = req.path().split('/').into_iter().nth(4).unwrap().to_string().parse().unwrap();
+    let parts: Vec<&str> = req.path().split('/').collect();
+    let username: String = parts[2].to_string();
+    let tweet_id: i32 = parts[4].to_string().parse().unwrap();
     let user = sqlx::query_as!(UserModel, "
     SELECT 
         user_id,
@@ -46,9 +48,17 @@ pub async fn view_tweet(
         .await
         .unwrap();
     if user.user_id != tweet.user_id {
-        return HttpResponse::error(&self)
+        HttpResponse::InternalServerError();
     }
-    HttpResponse::Ok().body("This will soon be the view tweet page!")
+    println!("reached here");
+    let json_response = serde_json::json!({
+        "data": {
+            "tweet": serde_json::json!({
+                "tweet": make_tweet_model_response(&tweet)
+            })
+        }
+    });
+    HttpResponse::Ok().json(json_response)
 }
 
 #[get("/twitter/{username}/status/{tweetid}/likes")]
