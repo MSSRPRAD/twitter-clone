@@ -32,7 +32,32 @@ CREATE TABLE IF NOT EXISTS TWEETS (
     FOREIGN KEY (user_id) REFERENCES USERS(user_id),
     parent_id INT,
     FOREIGN KEY (parent_id) REFERENCES TWEETS(tweet_id),
-    content VARCHAR(255) NOT NULL,
+    content VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    likes INT DEFAULT 0 NOT NULL,
+    retweets INT DEFAULT 0 NOT NULL,
+    quotes INT DEFAULT 0 NOT NULL,
+    views INT DEFAULT 0 NOT NULL,
+    replies INT DEFAULT 0 NOT NULL,
+    quote_id INT,
+    FOREIGN KEY (quote_id) REFERENCES TWEETS(tweet_id)
+);
+
+CREATE TABLE LIKES (
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id),
+    tweet_id INT NOT NULL,
+    FOREIGN KEY (tweet_id) REFERENCES TWEETS(tweet_id),
+    PRIMARY KEY(user_id, tweet_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE RETWEETS (
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id),
+    tweet_id INT NOT NULL,
+    FOREIGN KEY (tweet_id) REFERENCES TWEETS(tweet_id),
+    PRIMARY KEY(user_id, tweet_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

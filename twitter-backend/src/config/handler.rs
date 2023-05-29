@@ -10,7 +10,7 @@ use crate::routes::{
     notification_routes::notifications,
     bookmark_routes::bookmarks,
     explore_routes::explore,
-    tweet_routes::{view_tweet, view_tweet_likes, view_quote_tweets, tweet_analytics}
+    tweet_routes::{view_tweet, view_tweet_likes, view_quote_tweets, tweet_analytics, make_tweet}
 };
 
 pub fn config(conf: &mut web::ServiceConfig) {
@@ -37,6 +37,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
     .service(login_post)
     .service(get_me_handler)
     .service(profile_username)
+    .service(make_tweet)
     .service(logout);
     conf.service(scope);
 }

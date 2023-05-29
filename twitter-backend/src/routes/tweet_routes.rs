@@ -1,6 +1,9 @@
-use actix_web::{get, HttpResponse, HttpRequest, web};
+use actix_web::{get, HttpResponse, HttpRequest, web, post, HttpMessage};
+use crate::authentication::middleware;
 use crate::config::AppState;
-use crate::responses::tweet::make_tweet_model_response;
+use crate::responses::tweet::{make_tweet_model_response, TweetModelResponse};
+use crate::responses::user;
+use crate::schema::tweet::TweetCreateResponse;
 use crate::schema::{tweet::TweetModel, user::UserModel};
 use sqlx::Row;
 
@@ -31,7 +34,13 @@ pub async fn view_tweet(
         user_id,
         parent_id,
         content, 
-        created_at
+        created_at,
+        likes,
+        quote_id,
+        quotes,
+        replies,
+        retweets,
+        views
     FROM TWEETS
     WHERE 
     tweet_id = ?", tweet_id)
@@ -61,4 +70,27 @@ pub async fn view_quote_tweets() -> HttpResponse {
 #[get("/twitter/{username}/status/{tweetid}/analytics")]
 pub async fn tweet_analytics() -> HttpResponse {
     HttpResponse::Ok().body("This will soon be the tweet analytics page!")
+}
+
+#[post("/twitter/maketweet")]
+pub async fn make_tweet(
+    req: HttpRequest,
+    body: web::Json<TweetCreateResponse>,
+    data: web::Data<AppState>,
+    _: middleware::JwtMiddleware,
+) -> HttpResponse {
+    let ext = req.extensions();
+    let user_id = ext.get::<i32>().unwrap();
+    // Insert tweet into db
+    let _insert_result = sqlx::query(
+        "INSERT INTO TWEETS 
+            (user_id, content) 
+        VALUES 
+            (?, ?);"
+    )
+    .bind(user_id)
+    .bind(body.content.to_string())
+    .execute(&data.db)
+    .await;
+    HttpResponse::Ok().body("This will soon be the make tweet page!")
 }
