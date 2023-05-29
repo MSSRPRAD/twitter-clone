@@ -14,7 +14,7 @@ pub struct UserModelResponse {
     pub password: String,
 }
 
-pub fn make_user_response(user: &UserModel) -> UserModelResponse {
+pub fn make_user_model_response(user: &UserModel) -> UserModelResponse {
     UserModelResponse {
         role_id: user.role_id.to_owned(),
         user_id: user.user_id.to_owned(), 

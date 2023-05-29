@@ -20,7 +20,7 @@ use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString}
 };
 use crate::{
-    responses::user::{make_user_response, UserModelResponse},
+    responses::user::{make_user_model_response, UserModelResponse},
     config::AppState,
 };
 
@@ -158,7 +158,7 @@ async fn register_post(
     match query_result {
         Ok(user) => {
             let user_response = serde_json::json!({"status": "success","data": serde_json::json!({
-                "user": make_user_response(&user)
+                "user": make_user_model_response(&user)
             })});
             return HttpResponse::Ok().json(user_response);
         }
@@ -202,7 +202,7 @@ pub async fn allusers(data: web::Data<AppState>) -> HttpResponse {
 
     let user_responses = users
     .into_iter()
-    .map(|user| make_user_response(&user))
+    .map(|user| make_user_model_response(&user))
     .collect::<Vec<UserModelResponse>>();
 
     let json_response = serde_json::json!({
@@ -261,7 +261,7 @@ async fn get_me_handler(
     let json_response = serde_json::json!({
         "status":  "success",
         "data": serde_json::json!({
-            "user": make_user_response(&user)
+            "user": make_user_model_response(&user)
         })
     });
     println!("json response generated: {}", json_response);

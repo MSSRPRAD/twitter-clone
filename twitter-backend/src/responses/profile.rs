@@ -11,7 +11,7 @@ pub struct ProfileModelResponse {
     pub about: String,
 }
 
-pub fn make_profile_response(profile: &ProfileModel) -> ProfileModelResponse {
+pub fn make_profile_model_response(profile: &ProfileModel) -> ProfileModelResponse {
     ProfileModelResponse {
         profile_id: profile.profile_id.to_owned(), 
         phone_no: profile.phone_no.to_owned(),
