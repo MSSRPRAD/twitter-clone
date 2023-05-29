@@ -15,6 +15,7 @@ interface RegisterUserSchema {
 interface UserModelResponse {
 	role_id: number;
 	user_id: number;
+	name: string;
 	username: string;
 	email: string;
 	created_at: string;
