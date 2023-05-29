@@ -2,13 +2,8 @@ use actix_web::{get, HttpResponse, HttpRequest, web};
 use crate::config::AppState;
 use crate::responses::tweet::make_tweet_model_response;
 use crate::schema::{tweet::TweetModel, user::UserModel};
-/*
-pub tweet_id: i32,
-    pub user_id: i32,
-    pub parent_id: Option<i32>,
-    pub content: String,
-    pub created_at: Option<chrono::DateTime<chrono::Utc>>
- */
+use sqlx::Row;
+
 #[get("/twitter/{username}/status/{tweetid}")]
 pub async fn view_tweet(
     req: HttpRequest,
@@ -17,23 +12,19 @@ pub async fn view_tweet(
     let parts: Vec<&str> = req.path().split('/').collect();
     let username: String = parts[2].to_string();
     let tweet_id: i32 = parts[4].to_string().parse().unwrap();
-    let user = sqlx::query_as!(UserModel, "
-    SELECT 
-        user_id,
-        name,
-        role_id, 
-        username, 
-        email, 
-        created_at, 
-        dob, 
-        profile_id, 
-        password 
-    FROM USERS
-    WHERE 
-    username = ?", username)
+    let exists: bool = sqlx::query("SELECT EXISTS(SELECT 1 FROM USERS, TWEETS WHERE USERS.user_id = TWEETS.user_id AND TWEETS.tweet_id = ? AND USERS.username = ?);")
+        .bind(tweet_id)
+        .bind(username)
         .fetch_one(&data.db)
         .await
-        .unwrap();
+        .unwrap()
+        .get(0);
+    // If the user already exists, return a Conflict response
+    if !exists {
+        return HttpResponse::Conflict().json(
+            serde_json::json!({"status": "fail","message": "This combination of username and tweetid does not exist in database."}),
+        );
+    }
     let tweet: TweetModel = sqlx::query_as!(TweetModel, "
     SELECT 
         tweet_id,
@@ -47,10 +38,6 @@ pub async fn view_tweet(
         .fetch_one(&data.db)
         .await
         .unwrap();
-    if user.user_id != tweet.user_id {
-        HttpResponse::InternalServerError();
-    }
-    println!("reached here");
     let json_response = serde_json::json!({
         "data": {
             "tweet": serde_json::json!({
