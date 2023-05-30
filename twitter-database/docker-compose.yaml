@@ -1,13 +1,15 @@
-version: '3'
+version: "3"
 services:
   mysql:
     image: mysql:latest
-    container_name: mysql-twitterdb
+    container_name: db
     env_file:
       - ./.env
     ports:
-      - '6500:3306'
+      - "6500:3306"
     volumes:
       - mysqlDB:/var/lib/mysql
+      - /home/polaris/twitter-clone/twitter-database/migrations:/scripts
 volumes:
   mysqlDB:
+  scripts:
