@@ -8,7 +8,8 @@ use actix_web::{
     HttpRequest, HttpMessage,
 
 };
-use crate::authentication::{middleware::{TokenClaims, self}};
+
+use crate::{authentication::{middleware::{TokenClaims, self}}, errors::auth::AuthError};
 use crate::authentication::middleware::JwtMiddleware;
 use sqlx::Row;
 use crate::schema::user::{UserModel, LoginUserSchema, RegisterUserSchema};
@@ -23,62 +24,38 @@ use crate::{
     responses::user::{make_user_model_response, UserModelResponse},
     config::AppState,
 };
+use crate::authentication::{middleware::validate_credentials};
+use crate::errors::auth::ErrorResponse;
 
 #[post("/login")]
 async fn login_post(
     body: web::Json<LoginUserSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-
-    // See if the username exists
-    let user = sqlx::query_as!(UserModel, "SELECT * FROM USERS WHERE username = ?", body.username)
-        .fetch_optional(&data.db)
-        .await
-        .unwrap()
-        .unwrap();
-    // If it does, check if the password is correct
-    let parsed_hash = PasswordHash::new(&user.password).unwrap();
-
-    let is_valid = Argon2::default()
-        .verify_password(body.password.as_bytes(), &parsed_hash)
-        .map_or(false, |_| true);
-    println!("valid: {}", is_valid);
+    let loginuser = body.into_inner();
+    let auth_error = validate_credentials(&loginuser, data).await;
+    let response_json;
     // If it is not valid, return a BadRequest response
-    if !is_valid {
-        return HttpResponse::BadRequest()
-            .json(json!({"status": "fail", "message": "Invalid username or password"}));
+    match auth_error{
+        AuthError::InvalidUsernameError => {
+            response_json = json!(ErrorResponse::InvalidUser());
+        },
+        AuthError::WrongPasswordError => {
+            response_json = json!(ErrorResponse::InvalidCredentials());
+        },
+        AuthError::NoError => {
+            response_json = json!(ErrorResponse::NoError());
+        },
     }
-    // If it is valid, generate a jwt token and return it
-    // User will use this token from now onwards in future requests
-
-    // Some Magic for generating jwt tokens
-    let now = Utc::now();
-    let iat = now.timestamp() as usize;
-    let exp = (now + Duration::minutes(60)).timestamp() as usize;
-    let claims: TokenClaims = TokenClaims {
-        sub: user.user_id.to_string(),
-        exp,
-        iat,
-    };
-
-    // Generating the token
-    let token = encode(
-        &Header::default(),
-        &claims,
-        &EncodingKey::from_secret(data.env.jwt_secret.as_ref()),
-    )
-    .unwrap();
-
-    // Returning the token in a cookie
-    let cookie = Cookie::build("token", token.to_owned())
+    let cookie = Cookie::build("username", loginuser.username)
         .path("/")
-        .max_age(ActixWebDuration::new(60 * 60, 0))
         .http_only(true)
         .finish();
+    // If it is valid, return cookie with the username
     // Return token with response
     HttpResponse::Ok()
         .cookie(cookie)
-        .json(json!({"status": "success", "token": token}))
+        .json(response_json)
 }
 
 #[get("/login")]

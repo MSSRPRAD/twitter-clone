@@ -1,12 +1,16 @@
 use std::future::{ready, Ready};
 use crate::config::AppState;
+use crate::schema::user::{LoginUserSchema, UserModel};
 use actix_web::error::ErrorUnauthorized;
 use actix_web::{dev::Payload, Error as ActixWebError};
-use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest};
+use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest, App};
+use argon2::{PasswordHash, Argon2};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::Serialize;
 use crate::authentication::errors::ErrorResponse;
 use serde_derive::Deserialize;
+use crate::errors::auth::AuthError;
+use argon2::PasswordVerifier;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TokenClaims {
@@ -17,6 +21,69 @@ pub struct TokenClaims {
 
 pub struct JwtMiddleware {
     pub user_id: i32,
+}
+
+pub async fn user_exists(user_id: i32, data: web::Data<AppState>) -> bool {
+    let option_user = sqlx::query_as!(UserModel, "
+    SELECT 
+        user_id,
+        name,
+        role_id, 
+        username, 
+        email, 
+        created_at, 
+        dob, 
+        profile_id, 
+        password 
+    FROM USERS
+    WHERE 
+    user_id = ?", user_id.to_string())
+        .fetch_one(&data.db)
+        .await;
+    match option_user {
+        Ok(_) => true,
+        Err(_) => false,
+    }
+}
+
+pub async fn validate_credentials(loginuser: &LoginUserSchema, data: web::Data<AppState>) -> AuthError {
+    let option_user = sqlx::query_as!(UserModel, "
+    SELECT 
+        user_id,
+        name,
+        role_id, 
+        username, 
+        email, 
+        created_at, 
+        dob, 
+        profile_id, 
+        password 
+    FROM USERS
+    WHERE 
+    username = ?", loginuser.username.to_string())
+        .fetch_one(&data.db)
+        .await;
+    match option_user {
+        Ok(_) => {
+            let user = option_user.unwrap();
+            // If it does, check if the password is correct
+            let parsed_hash = PasswordHash::new(&user.password).unwrap();
+
+            let is_valid = Argon2::default()
+                .verify_password(user.password.as_bytes(), &parsed_hash)
+                .map_or(false, |_| true);
+            println!("valid: {}", is_valid);
+            // If it is not valid, return a BadRequest response
+            if !is_valid {
+               return AuthError::WrongPasswordError;
+            } else {
+                return AuthError::NoError;
+            }
+        },
+        Err(_) => {
+            return AuthError::InvalidUsernameError;
+        },
+    }
 }
 
 // Pure Magic. Don't touch!!!!
