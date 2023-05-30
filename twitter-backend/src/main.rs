@@ -6,7 +6,8 @@ use twitter_backend::config::{AppState, config::Config};
 use dotenv::dotenv;
 use env_logger;
 use twitter_backend::config::handler;
-
+use actix_session::storage::RedisActorSessionStore;
+use actix_session::SessionMiddleware;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     if std::env::var_os("RUST_LOG").is_none() {
@@ -16,7 +17,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     let config = Config::init();
-
+    let private_key = actix_web::cookie::Key::generate();
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = match MySqlPoolOptions::new()
         .max_connections(10)
@@ -49,6 +50,14 @@ async fn main() -> std::io::Result<()> {
             ])
             .supports_credentials();
         App::new()
+            // redis session middleware
+            .wrap(
+                SessionMiddleware::builder(
+                    RedisActorSessionStore::new("127.0.0.1:6379"),
+                    private_key.clone(),
+                )
+                .build(),
+            )
             .app_data(web::Data::new(AppState {
                 db: pool.clone(),
                 env: config.clone(),

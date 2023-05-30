@@ -1,3 +1,4 @@
+use actix_session::Session;
 use actix_web::{
     get, 
     HttpResponse, 
@@ -8,7 +9,7 @@ use actix_web::{
     HttpRequest, HttpMessage,
 
 };
-
+use crate::authentication::middleware::SessionValue;
 use crate::{authentication::{middleware::{TokenClaims, self}}, errors::auth::AuthError};
 use crate::authentication::middleware::JwtMiddleware;
 use sqlx::Row;
@@ -31,6 +32,7 @@ use crate::errors::auth::ErrorResponse;
 async fn login_post(
     body: web::Json<LoginUserSchema>,
     data: web::Data<AppState>,
+    session: Session
 ) -> impl Responder {
     let loginuser = body.into_inner();
     let auth_error = validate_credentials(&loginuser, data).await;
@@ -44,6 +46,15 @@ async fn login_post(
             response_json = json!(ErrorResponse::InvalidCredentials());
         },
         AuthError::NoError => {
+            let value: SessionValue = SessionValue{
+                username: loginuser.username.clone(),
+                role_id: 0,
+                created_at: Some(chrono::Utc::now()),
+            };
+            let key = loginuser.username.clone();
+            session.remove(&key);
+            session.insert(&key, &value);
+            session.renew();
             response_json = json!(ErrorResponse::NoError());
         },
     }

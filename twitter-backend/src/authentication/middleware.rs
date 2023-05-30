@@ -13,6 +13,13 @@ use crate::errors::auth::AuthError;
 use argon2::PasswordVerifier;
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct SessionValue {
+    pub username: String,
+    pub role_id: i32,
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TokenClaims {
     pub sub: String,
     pub iat: usize,
@@ -66,11 +73,12 @@ pub async fn validate_credentials(loginuser: &LoginUserSchema, data: web::Data<A
     match option_user {
         Ok(_) => {
             let user = option_user.unwrap();
+            println!("user: {:?}", user);
             // If it does, check if the password is correct
             let parsed_hash = PasswordHash::new(&user.password).unwrap();
-
+            
             let is_valid = Argon2::default()
-                .verify_password(user.password.as_bytes(), &parsed_hash)
+                .verify_password(loginuser.password.as_bytes(), &parsed_hash)
                 .map_or(false, |_| true);
             println!("valid: {}", is_valid);
             // If it is not valid, return a BadRequest response
