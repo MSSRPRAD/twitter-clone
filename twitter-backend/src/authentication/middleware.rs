@@ -2,14 +2,14 @@ use crate::authentication::errors::ErrorResponse;
 use crate::config::AppState;
 use crate::errors::auth::AuthError;
 use crate::schema::user::{LoginUserSchema, RegisterUserSchema, UserModel};
-use actix_web::cookie::time::error;
-use actix_web::cookie::Cookie;
-use actix_web::dev::ServiceResponse;
-use actix_web::error::ErrorInternalServerError;
+
+
+
+
 use actix_web::error::ErrorUnauthorized;
-use actix_web::http::header::HeaderValue;
-use actix_web::http::{header, Error};
-use actix_web::web::Data;
+
+
+
 use actix_web::{dev::Payload, Error as ActixWebError};
 use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest};
 use argon2::password_hash::rand_core::OsRng;
@@ -17,12 +17,12 @@ use argon2::password_hash::SaltString;
 use argon2::PasswordVerifier;
 use argon2::{Argon2, PasswordHash, PasswordHasher};
 use deadpool_redis::redis::AsyncCommands;
-use deadpool_redis::{Connection, Manager, Pool};
+
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::Serialize;
 use serde_derive::Deserialize;
 use std::future::{ready, Ready};
-use time::{self, Duration};
+
 
 // pub async fn get_redis_con(sessiondb: Data<Pool>) -> Connection {
 //     return sessiondb

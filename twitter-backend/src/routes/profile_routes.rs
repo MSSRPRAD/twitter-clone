@@ -1,9 +1,9 @@
-use crate::authentication::middleware;
+
 use crate::config::AppState;
 use crate::responses::profile::make_profile_model_response;
 use crate::responses::user::make_user_model_response;
 use crate::schema::{profile::ProfileModel, user::UserModel};
-use actix_web::{get, web, HttpMessage, HttpRequest, HttpResponse};
+use actix_web::{get, web, HttpRequest, HttpResponse};
 
 #[get("/profile/{username}")]
 pub async fn profile_username(

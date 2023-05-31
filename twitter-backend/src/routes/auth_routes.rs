@@ -1,28 +1,24 @@
 use crate::authentication::middleware::validate_credentials;
-use crate::authentication::middleware::JwtMiddleware;
+
 use crate::authentication::middleware::{register_user, user_exists, SessionValue};
 use crate::errors::auth::ErrorResponse;
 use crate::schema::user::{LoginUserSchema, RegisterUserSchema, UserModel};
 use crate::{
-    authentication::middleware::{self, TokenClaims},
+    authentication::middleware::{self},
     errors::auth::AuthError,
 };
 use crate::{
     config::AppState,
     responses::user::{make_user_model_response, UserModelResponse},
 };
-use actix_session::storage::SessionKey;
+
 use actix_session::Session;
 use actix_web::{
-    cookie::{time::Duration as ActixWebDuration, Cookie},
     get, post, web, HttpMessage, HttpRequest, HttpResponse, Responder,
 };
-use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
-    Argon2,
-};
-use chrono::{prelude::*, Duration};
-use jsonwebtoken::{encode, EncodingKey, Header};
+
+
+
 use serde_json::json;
 use sqlx::Row;
 

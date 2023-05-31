@@ -1,9 +1,9 @@
 use crate::authentication::middleware;
 use crate::config::AppState;
-use crate::responses::tweet::{make_tweet_model_response, TweetModelResponse};
-use crate::responses::user;
+use crate::responses::tweet::{make_tweet_model_response};
+
 use crate::schema::tweet::TweetCreateResponse;
-use crate::schema::{tweet::TweetModel, user::UserModel};
+use crate::schema::{tweet::TweetModel};
 use actix_web::{get, post, web, HttpMessage, HttpRequest, HttpResponse};
 use sqlx::Row;
 
