@@ -1,16 +1,39 @@
 use std::future::{ready, Ready};
 use crate::config::AppState;
 use crate::schema::user::{LoginUserSchema, UserModel};
+use actix_web::cookie::Cookie;
+use actix_web::cookie::time::error;
+use actix_web::dev::ServiceResponse;
 use actix_web::error::ErrorUnauthorized;
+use actix_web::http::{Error, header};
+use actix_web::http::header::HeaderValue;
+use actix_web::web::Data;
 use actix_web::{dev::Payload, Error as ActixWebError};
-use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest, App};
+use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest};
 use argon2::{PasswordHash, Argon2};
+use deadpool_redis::{Connection, Manager, Pool};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::Serialize;
 use crate::authentication::errors::ErrorResponse;
 use serde_derive::Deserialize;
 use crate::errors::auth::AuthError;
 use argon2::PasswordVerifier;
+use time::{self, Duration};
+use actix_web::error::ErrorInternalServerError;
+use deadpool_redis::redis::AsyncCommands;
+
+// pub async fn get_redis_con(sessiondb: Data<Pool>) -> Connection {
+//     return sessiondb
+//         .get()
+//         .await
+//         .map_err(|e| {
+//             actix_web::HttpResponse::InternalServerError().json(crate::errors::auth::ErrorResponse{
+//                 status: "failed".to_string(),
+//                 message: "could not connect to redis".to_string(),
+//             })
+//         })
+//         .expect("Redis connection cannot be gotten.");
+// }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SessionValue {
@@ -67,20 +90,18 @@ pub async fn validate_credentials(loginuser: &LoginUserSchema, data: web::Data<A
         password 
     FROM USERS
     WHERE 
-    username = ?", loginuser.username.to_string())
+    username = ? AND role_id = ?", loginuser.username.to_string(), loginuser.role_id)
         .fetch_one(&data.db)
         .await;
     match option_user {
         Ok(_) => {
             let user = option_user.unwrap();
-            println!("user: {:?}", user);
             // If it does, check if the password is correct
             let parsed_hash = PasswordHash::new(&user.password).unwrap();
             
             let is_valid = Argon2::default()
                 .verify_password(loginuser.password.as_bytes(), &parsed_hash)
                 .map_or(false, |_| true);
-            println!("valid: {}", is_valid);
             // If it is not valid, return a BadRequest response
             if !is_valid {
                return AuthError::WrongPasswordError;
@@ -93,6 +114,20 @@ pub async fn validate_credentials(loginuser: &LoginUserSchema, data: web::Data<A
         },
     }
 }
+
+// /// invalidates session cookie
+// fn remove_cookie<B>(&self, res: &mut ServiceResponse<B>) -> Result<(), Error> {
+//     let mut cookie = Cookie::named(self.name.clone());
+//     cookie.set_value("");
+//     cookie.set_max_age(Duration::seconds(0));
+//     cookie.set_expires(Duration::ne(&self, other) - Duration::days(365));
+
+//     let val = HeaderValue::from_str(&cookie.to_string())
+//         .map_err(ErrorInternalServerError);
+//     res.headers_mut().append(header::SET_COOKIE, val);
+
+//     Ok(())
+// }
 
 // Pure Magic. Don't touch!!!!
 impl FromRequest for JwtMiddleware {

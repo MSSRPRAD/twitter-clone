@@ -34,6 +34,22 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    // let redis_url = std::env::var("REDIS_URI").expect("Failed to get REDIS_URL.");
+
+    // Redis connection pool
+    // let cfg = deadpool_redis::Config::from_url(redis_url.clone());
+    // let redis_pool = cfg
+    //     .create_pool(Some(deadpool_redis::Runtime::Tokio1))
+    //     .expect("🔥 Failed to connect to the redis instance.");
+    // let redis_pool_data = actix_web::web::Data::new(redis_pool);
+    // println!("✅Connection to the redis instance is successful!");
+    // // For session
+    // // Random secret key
+    // let secret_key = actix_web::cookie::Key::from(&[0; 100]);
+    // let redis_store = actix_session::storage::RedisSessionStore::new(redis_url.clone())
+    //     .await
+    //     .expect("Cannot unwrap redis session.");
+
     println!("🚀 Server started successfully");
     println!("Serving on 127.0.0.1:8000");
 
@@ -55,12 +71,14 @@ async fn main() -> std::io::Result<()> {
                 SessionMiddleware::builder(
                     RedisActorSessionStore::new("127.0.0.1:6379"),
                     private_key.clone(),
-                )
+                ).cookie_name("test-session".to_string())
                 .build(),
+                
             )
             .app_data(web::Data::new(AppState {
                 db: pool.clone(),
                 env: config.clone(),
+                // sessiondb: redis_pool_data.clone(),
             }))
             .configure(handler::config)
             .wrap(cors)

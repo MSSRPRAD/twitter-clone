@@ -9,6 +9,7 @@ use actix_web::{
     HttpRequest, HttpMessage,
 
 };
+use actix_session::storage::SessionKey;
 use crate::authentication::middleware::SessionValue;
 use crate::{authentication::{middleware::{TokenClaims, self}}, errors::auth::AuthError};
 use crate::authentication::middleware::JwtMiddleware;
@@ -34,6 +35,8 @@ async fn login_post(
     data: web::Data<AppState>,
     session: Session
 ) -> impl Responder {
+
+    // let mut redis_con = middleware::get_redis_con(data.sessiondb.clone()).await;
     let loginuser = body.into_inner();
     let auth_error = validate_credentials(&loginuser, data).await;
     let response_json;
@@ -51,21 +54,18 @@ async fn login_post(
                 role_id: 0,
                 created_at: Some(chrono::Utc::now()),
             };
-            let key = loginuser.username.clone();
-            session.remove(&key);
-            session.insert(&key, &value);
+            let _ = session.insert("user", &value).map_err(|_| {
+                println!("could not add user to session");
+                return HttpResponse::Ok();
+            }
+            );
             session.renew();
             response_json = json!(ErrorResponse::NoError());
         },
     }
-    let cookie = Cookie::build("username", loginuser.username)
-        .path("/")
-        .http_only(true)
-        .finish();
-    // If it is valid, return cookie with the username
+    // If it is valid, return cookie with the session id
     // Return token with response
     HttpResponse::Ok()
-        .cookie(cookie)
         .json(response_json)
 }
 
@@ -203,15 +203,16 @@ pub async fn allusers(data: web::Data<AppState>) -> HttpResponse {
 
 
 #[get("/logout")]
-pub async fn logout(_: JwtMiddleware) -> impl Responder {
-    let cookie = Cookie::build("token", "")
-        .path("/")
-        .max_age(ActixWebDuration::new(-1, 0))
-        .http_only(true)
-        .finish();
-
+pub async fn logout(session: Session) -> impl Responder {
+    let user: Option<SessionValue> = session.get(&"user").unwrap();
+    println!("user: {:?}", user);
+    if let Some(x) = user {
+        session.purge();
+        println!("user {:?} logged out", x);
+    } else {
+        println!("user not logged in");
+    }
     HttpResponse::Ok()
-        .cookie(cookie)
         .json(json!({"status": "success"}))
 }
 
