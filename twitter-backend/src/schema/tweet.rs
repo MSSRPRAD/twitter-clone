@@ -19,5 +19,5 @@ pub struct TweetModel {
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize)]
 pub struct TweetCreateResponse {
-    pub content: String
+    pub content: String,
 }

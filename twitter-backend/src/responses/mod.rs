@@ -1,4 +1,4 @@
-pub mod role;
 pub mod profile;
-pub mod user;
+pub mod role;
 pub mod tweet;
+pub mod user;

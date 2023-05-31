@@ -1,17 +1,14 @@
-use actix_web::{get, HttpResponse, HttpRequest, web, post, HttpMessage};
 use crate::authentication::middleware;
 use crate::config::AppState;
 use crate::responses::tweet::{make_tweet_model_response, TweetModelResponse};
 use crate::responses::user;
 use crate::schema::tweet::TweetCreateResponse;
 use crate::schema::{tweet::TweetModel, user::UserModel};
+use actix_web::{get, post, web, HttpMessage, HttpRequest, HttpResponse};
 use sqlx::Row;
 
 #[get("/twitter/{username}/status/{tweetid}")]
-pub async fn view_tweet(
-    req: HttpRequest,
-    data: web::Data<AppState>,
-) -> HttpResponse {
+pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResponse {
     let parts: Vec<&str> = req.path().split('/').collect();
     let username: String = parts[2].to_string();
     let tweet_id: i32 = parts[4].to_string().parse().unwrap();
@@ -28,7 +25,9 @@ pub async fn view_tweet(
             serde_json::json!({"status": "fail","message": "This combination of username and tweetid does not exist in database."}),
         );
     }
-    let tweet: TweetModel = sqlx::query_as!(TweetModel, "
+    let tweet: TweetModel = sqlx::query_as!(
+        TweetModel,
+        "
     SELECT 
         tweet_id,
         user_id,
@@ -43,10 +42,12 @@ pub async fn view_tweet(
         views
     FROM TWEETS
     WHERE 
-    tweet_id = ?", tweet_id)
-        .fetch_one(&data.db)
-        .await
-        .unwrap();
+    tweet_id = ?",
+        tweet_id
+    )
+    .fetch_one(&data.db)
+    .await
+    .unwrap();
     let json_response = serde_json::json!({
         "data": {
             "tweet": serde_json::json!({
@@ -86,7 +87,7 @@ pub async fn make_tweet(
         "INSERT INTO TWEETS 
             (user_id, content) 
         VALUES 
-            (?, ?);"
+            (?, ?);",
     )
     .bind(user_id)
     .bind(body.content.to_string())

@@ -1,6 +1,6 @@
-use actix_web::web::Data;
-use sqlx::mysql::{MySqlPool};
 use crate::config::config::Config;
+use actix_web::web::Data;
+use sqlx::mysql::MySqlPool;
 pub mod config;
 pub mod handler;
 

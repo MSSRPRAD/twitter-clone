@@ -1,13 +1,13 @@
-use actix_web::{App, HttpServer, web, http::header, middleware::Logger};
-use sqlx::mysql::{MySqlPoolOptions};
 use actix_cors::Cors;
+use actix_web::{http::header, middleware::Logger, web, App, HttpServer};
+use sqlx::mysql::MySqlPoolOptions;
 // Import the AppState type
-use twitter_backend::config::{AppState, config::Config};
+use actix_session::storage::RedisActorSessionStore;
+use actix_session::SessionMiddleware;
 use dotenv::dotenv;
 use env_logger;
 use twitter_backend::config::handler;
-use actix_session::storage::RedisActorSessionStore;
-use actix_session::SessionMiddleware;
+use twitter_backend::config::{config::Config, AppState};
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     if std::env::var_os("RUST_LOG").is_none() {
@@ -53,8 +53,6 @@ async fn main() -> std::io::Result<()> {
     println!("🚀 Server started successfully");
     println!("Serving on 127.0.0.1:8000");
 
-    
-
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin("http://localhost:5173")
@@ -71,9 +69,9 @@ async fn main() -> std::io::Result<()> {
                 SessionMiddleware::builder(
                     RedisActorSessionStore::new("127.0.0.1:6379"),
                     private_key.clone(),
-                ).cookie_name("test-session".to_string())
+                )
+                .cookie_name("test-session".to_string())
                 .build(),
-                
             )
             .app_data(web::Data::new(AppState {
                 db: pool.clone(),
@@ -87,5 +85,4 @@ async fn main() -> std::io::Result<()> {
     .bind(("127.0.0.1", 8000))?
     .run()
     .await
-
 }

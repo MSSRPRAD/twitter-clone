@@ -1,9 +1,9 @@
-use actix_web::{get, HttpResponse, HttpRequest, web, HttpMessage};
-use crate::config::AppState;
 use crate::authentication::middleware;
+use crate::config::AppState;
 use crate::responses::profile::make_profile_model_response;
 use crate::responses::user::make_user_model_response;
-use crate::schema::{user::UserModel, profile::ProfileModel};
+use crate::schema::{profile::ProfileModel, user::UserModel};
+use actix_web::{get, web, HttpMessage, HttpRequest, HttpResponse};
 
 #[get("/profile/{username}")]
 pub async fn profile_username(
@@ -13,8 +13,16 @@ pub async fn profile_username(
 ) -> HttpResponse {
     // let ext = req.extensions();
     // let user_id = ext.get::<i32>().unwrap();
-    let username: String = req.path().split('/').into_iter().nth(2).unwrap().to_string();
-    let user = sqlx::query_as!(UserModel, "
+    let username: String = req
+        .path()
+        .split('/')
+        .into_iter()
+        .nth(2)
+        .unwrap()
+        .to_string();
+    let user = sqlx::query_as!(
+        UserModel,
+        "
     SELECT 
         user_id,
         name,
@@ -27,12 +35,16 @@ pub async fn profile_username(
         password 
     FROM USERS
     WHERE 
-    username = ?", username)
-        .fetch_one(&data.db)
-        .await
-        .unwrap();
+    username = ?",
+        username
+    )
+    .fetch_one(&data.db)
+    .await
+    .unwrap();
     let profile_id = user.profile_id.unwrap();
-    let profile: ProfileModel = sqlx::query_as!(ProfileModel, "
+    let profile: ProfileModel = sqlx::query_as!(
+        ProfileModel,
+        "
     SELECT 
         profile_id,
         about,
@@ -41,10 +53,12 @@ pub async fn profile_username(
         languages
         FROM PROFILES
         WHERE 
-    profile_id = (?);", profile_id)
-        .fetch_one(&data.db)
-        .await
-        .unwrap();
+    profile_id = (?);",
+        profile_id
+    )
+    .fetch_one(&data.db)
+    .await
+    .unwrap();
     let json_response = serde_json::json!({
         "status":  "success",
         "data": {

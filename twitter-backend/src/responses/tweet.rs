@@ -1,5 +1,5 @@
 use crate::schema::tweet::TweetModel;
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TweetModelResponse {

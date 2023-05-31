@@ -3,9 +3,9 @@ use serde_derive::{Deserialize, Serialize};
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow, Clone)]
 pub struct UserModel {
-    pub user_id: i32, 
+    pub user_id: i32,
     pub role_id: i32,
-    pub username: String, 
+    pub username: String,
     pub name: String,
     pub email: String,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,

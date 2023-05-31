@@ -1,5 +1,5 @@
-use serde_derive::{Serialize};
 use core::fmt;
+use serde_derive::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct ErrorResponse {
