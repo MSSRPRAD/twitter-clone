@@ -13,6 +13,7 @@ use crate::{
 };
 
 use actix_session::Session;
+use actix_web::web::Json;
 use actix_web::{
     get, post, web, HttpMessage, HttpRequest, HttpResponse, Responder,
 };
@@ -142,42 +143,41 @@ pub async fn logout(session: Session) -> impl Responder {
 }
 
 // {"status":"success","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWF0IjoxNjg1Mjg5MzY4LCJleHAiOjE2ODUyOTI5Njh9.ZurLLa3kxD8EqkyJ6ZHBGlP3-5tLyIu_BcCxpLRaM8A"}⏎
-
+// Protected route for testing authentication
 #[get("/users/me")]
 async fn get_me_handler(
     req: HttpRequest,
     data: web::Data<AppState>,
-    _: middleware::JwtMiddleware,
+    session: Session
 ) -> impl Responder {
-    let ext = req.extensions();
-    let user_id = ext.get::<i32>().unwrap();
-    let user = sqlx::query_as!(
-        UserModel,
-        "
-    SELECT 
-        user_id,
-        name,
-        role_id, 
-        username, 
-        email, 
-        created_at, 
-        dob, 
-        profile_id, 
-        password 
-    FROM USERS
-    WHERE 
-    user_id = ?",
-        user_id.to_string()
-    )
-    .fetch_one(&data.db)
-    .await
-    .unwrap();
-    let json_response = serde_json::json!({
-        "status":  "success",
-        "data": serde_json::json!({
-            "user": make_user_model_response(&user)
-        })
-    });
+    let user: Option<SessionValue> = session.get(&"user").unwrap();
+    if let Some(x) = &user {
+        let username = user.unwrap().username;
+        let queryuser = sqlx::query_as!(
+            UserModel,
+            "
+        SELECT 
+            user_id,
+            name,
+            role_id, 
+            username, 
+            email, 
+            created_at, 
+            dob, 
+            profile_id, 
+            password 
+        FROM USERS
+        WHERE 
+        username = ?",
+            username.to_string()
+        )
+        .fetch_one(&data.db)
+        .await
+        .unwrap();
+        println!("user {:?}", queryuser);
+    } else {
+        println!("user not logged in");
+    }
 
-    HttpResponse::Ok().json(json_response)
+    HttpResponse::Ok().json(json!({"status": "success"}))
 }
