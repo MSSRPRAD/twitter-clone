@@ -2,14 +2,17 @@ use crate::{config::AppState, functions::{user::{self, user_from_username}, prof
 use actix_web::{get, web, HttpRequest, HttpResponse};
 use serde_json::{Value, json};
 use crate::responses::profile::UserDetailsResponse;
+
 #[get("/profile/{username}")]
 pub async fn profile_username(
     req: HttpRequest,
     data: web::Data<AppState>,
     // _: middleware::JwtMiddleware,
 ) -> HttpResponse {
-    let username = req.query_string().split("/").last().unwrap();
-    let opt_user = user_from_username(username.to_string(), &data).await;
+    let temp = req.uri().to_string();
+    let username = temp.split("/").last().unwrap();
+    // println!("username: {:?}", username[4]);
+    let opt_user = user_from_username(username.clone().to_string(), &data).await;
     match opt_user {
         None => {
             let json_response = json!(ErrorResponse::InvalidUser());
@@ -24,7 +27,7 @@ pub async fn profile_username(
                 }
                 _ => {
                     let details = make_user_details_response(&opt_prof.unwrap(), &opt_user.unwrap());
-                    let json_response = json!(ErrorResponse::NoError());
+                    let json_response = json!(details);
                     return HttpResponse::NotFound().json(json_response);
                 }
             }
