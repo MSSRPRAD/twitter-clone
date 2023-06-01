@@ -13,7 +13,7 @@ pub struct ProfileModelResponse {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UserDetailsResponse {
     pub username: String,
-    pub name: String, 
+    pub name: String,
     pub dob: String,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub phone_no: Option<String>,
@@ -35,7 +35,7 @@ pub fn make_profile_model_response(profile: &ProfileModel) -> ProfileModelRespon
 pub fn make_user_details_response(profile: &ProfileModel, user: &UserModel) -> UserDetailsResponse {
     UserDetailsResponse {
         username: profile.username.to_owned(),
-        name: user.name.to_owned(), 
+        name: user.name.to_owned(),
         dob: user.dob.to_owned(),
         created_at: user.created_at.to_owned(),
         phone_no: profile.phone_no.to_owned(),

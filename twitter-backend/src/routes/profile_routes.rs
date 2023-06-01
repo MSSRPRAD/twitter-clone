@@ -1,7 +1,11 @@
-use crate::{config::AppState, functions::{user::{self, user_from_username}, profile::profile_from_username}, errors::{profile::ProfileError, auth::ErrorResponse}, responses::profile::make_user_details_response};
+use crate::{
+    config::AppState,
+    errors::auth::ErrorResponse,
+    functions::{profile::profile_from_username, user::user_from_username},
+    responses::profile::make_user_details_response,
+};
 use actix_web::{get, web, HttpRequest, HttpResponse};
-use serde_json::{Value, json};
-use crate::responses::profile::UserDetailsResponse;
+use serde_json::json;
 
 #[get("/profile/{username}")]
 pub async fn profile_username(
@@ -26,7 +30,8 @@ pub async fn profile_username(
                     return HttpResponse::NotFound().json(json_response);
                 }
                 _ => {
-                    let details = make_user_details_response(&opt_prof.unwrap(), &opt_user.unwrap());
+                    let details =
+                        make_user_details_response(&opt_prof.unwrap(), &opt_user.unwrap());
                     let json_response = json!(details);
                     return HttpResponse::NotFound().json(json_response);
                 }
