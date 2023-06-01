@@ -1,11 +1,11 @@
 use actix_web::web;
 
-use crate::{schema::user::UserModel, config::AppState};
+use crate::{config::AppState, schema::user::UserModel};
 
 pub async fn user_from_username(username: String, data: &web::Data<AppState>) -> Option<UserModel> {
     let option_user = sqlx::query_as!(
-    UserModel,
-    "SELECT role_id, username, name, password, email, created_at, dob
+        UserModel,
+        "SELECT role_id, username, name, password, email, created_at, dob
     FROM USERS
     WHERE 
     username = ?;",

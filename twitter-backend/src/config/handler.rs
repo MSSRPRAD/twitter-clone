@@ -2,7 +2,7 @@ use crate::routes::auth_routes::{get_me_handler, login_post, logout, register_po
 use crate::routes::{
     auth_routes::{allusers, login, register},
     profile_routes::{profile_username, tweets, tweets_images, tweets_likes, tweets_with_replies},
-    tweet_routes::{view_tweet},
+    tweet_routes::view_tweet,
 };
 use actix_web::web;
 

@@ -1,10 +1,8 @@
-use crate::authentication::middleware;
 use crate::config::AppState;
-use crate::responses::tweet::{make_tweet_model_response};
+use crate::responses::tweet::make_tweet_model_response;
 
-use crate::schema::tweet::TweetCreateResponse;
-use crate::schema::{tweet::TweetModel};
-use actix_web::{get, post, web, HttpMessage, HttpRequest, HttpResponse};
+use crate::schema::tweet::TweetModel;
+use actix_web::{get, web, HttpRequest, HttpResponse};
 use sqlx::Row;
 
 #[get("/twitter/{username}/status/{tweetid}")]
@@ -42,7 +40,9 @@ pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
         views
     FROM TWEETS
     WHERE 
-    tweet_id = ?;", tweet_id)    
+    tweet_id = ?;",
+        tweet_id
+    )
     .fetch_one(&data.db)
     .await
     .unwrap();

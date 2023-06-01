@@ -1,21 +1,12 @@
-
-use crate::authentication::errors::ErrorResponse;
-use crate::authentication::middleware::user_exists;
 use crate::config::AppState;
-use crate::errors::auth::AuthError;
-use crate::errors::profile::ProfileError;
-use crate::functions::profile::profile_from_username;
-use crate::functions::user::user_from_username;
-use crate::responses::profile::make_profile_model_response;
-use crate::responses::user::{make_user_model_response, UserDetailsResponse};
-use crate::schema::{profile::ProfileModel, user::UserModel};
+
 use actix_web::{get, web, HttpRequest, HttpResponse};
 use serde_json::Value;
 
 #[get("/profile/{username}")]
 pub async fn profile_username(
-    req: HttpRequest,
-    data: web::Data<AppState>,
+    _req: HttpRequest,
+    _data: web::Data<AppState>,
     // _: middleware::JwtMiddleware,
 ) -> HttpResponse {
     let json_response: Value = Default::default();

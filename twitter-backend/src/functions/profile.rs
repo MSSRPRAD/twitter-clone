@@ -1,9 +1,7 @@
-
-
-use actix_web::web;
+use crate::config::AppState;
+use crate::errors::profile::ProfileError;
 use crate::schema::profile::ProfileModel;
-use crate::errors::profile::{ProfileError, self};
-use crate::{config::AppState, errors::auth::AuthError};
+use actix_web::web;
 
 // pub async fn fetch_user_details(
 
@@ -11,8 +9,8 @@ use crate::{config::AppState, errors::auth::AuthError};
 
 pub async fn profile_exists(username: String, data: &web::Data<AppState>) -> ProfileError {
     let option_profile = sqlx::query_as!(
-    ProfileModel,
-    "SELECT PROFILES.username, phone_no, location, languages, about
+        ProfileModel,
+        "SELECT PROFILES.username, phone_no, location, languages, about
     FROM PROFILES, USERS
     WHERE 
     PROFILES.username = ?
@@ -33,10 +31,13 @@ pub async fn profile_exists(username: String, data: &web::Data<AppState>) -> Pro
     }
 }
 
-pub async fn profile_from_username(username: String, data: &web::Data<AppState>) -> Option<ProfileModel> {
+pub async fn profile_from_username(
+    username: String,
+    data: &web::Data<AppState>,
+) -> Option<ProfileModel> {
     let option_profile = sqlx::query_as!(
-    ProfileModel,
-    "SELECT USERS.username, phone_no, location, languages, about
+        ProfileModel,
+        "SELECT USERS.username, phone_no, location, languages, about
     FROM PROFILES, USERS
     WHERE 
     USERS.username = ?

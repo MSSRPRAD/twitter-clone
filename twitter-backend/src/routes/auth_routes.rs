@@ -1,24 +1,17 @@
 use crate::authentication::middleware::validate_credentials;
 
 use crate::authentication::middleware::{register_user, user_exists, SessionValue};
+use crate::errors::auth::AuthError;
 use crate::errors::auth::ErrorResponse;
 use crate::schema::user::{LoginUserSchema, RegisterUserSchema, UserModel};
-use crate::{
-    authentication::middleware::{self},
-    errors::auth::AuthError,
-};
 use crate::{
     config::AppState,
     responses::user::{make_user_model_response, UserModelResponse},
 };
 
 use actix_session::Session;
-use actix_web::web::Json;
-use actix_web::{
-    get, post, web, HttpMessage, HttpRequest, HttpResponse, Responder,
-};
 
-
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 
 use serde_json::json;
 use sqlx::Row;
@@ -144,12 +137,12 @@ pub async fn logout(session: Session) -> impl Responder {
 // Protected route for testing authentication
 #[get("/users/me")]
 async fn get_me_handler(
-    req: HttpRequest,
+    _req: HttpRequest,
     data: web::Data<AppState>,
-    session: Session
+    session: Session,
 ) -> impl Responder {
     let user: Option<SessionValue> = session.get(&"user").unwrap();
-    if let Some(x) = &user {
+    if let Some(_x) = &user {
         let username = user.unwrap().username;
         let queryuser = sqlx::query_as!(
             UserModel,
