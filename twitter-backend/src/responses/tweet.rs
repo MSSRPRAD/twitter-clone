@@ -3,8 +3,8 @@ use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TweetModelResponse {
+    pub username: String,
     pub tweet_id: i32,
-    pub user_id: i32,
     pub parent_id: Option<i32>,
     pub content: String,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -18,8 +18,8 @@ pub struct TweetModelResponse {
 
 pub fn make_tweet_model_response(tweet: &TweetModel) -> TweetModelResponse {
     TweetModelResponse {
+        username: tweet.username.to_owned(),
         tweet_id: tweet.tweet_id.to_owned(),
-        user_id: tweet.user_id.to_owned(),
         parent_id: tweet.parent_id.to_owned(),
         content: tweet.content.to_owned(),
         created_at: tweet.created_at.to_owned(),

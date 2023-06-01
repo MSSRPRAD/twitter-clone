@@ -97,19 +97,17 @@ pub async fn allusers(data: web::Data<AppState>) -> HttpResponse {
     let users: Vec<UserModel> = sqlx::query_as!(
         UserModel,
         r#"SELECT 
-            user_id,
             name,
             role_id, 
             username, 
             email, 
             created_at, 
             dob, 
-            profile_id, 
             password 
         FROM 
             USERS
         ORDER BY
-            user_ID
+            created_at
         ;"#
     )
     .fetch_all(&data.db)
@@ -156,15 +154,13 @@ async fn get_me_handler(
         let queryuser = sqlx::query_as!(
             UserModel,
             "
-        SELECT 
-            user_id,
+        SELECT
             name,
             role_id, 
             username, 
             email, 
             created_at, 
             dob, 
-            profile_id, 
             password 
         FROM USERS
         WHERE 

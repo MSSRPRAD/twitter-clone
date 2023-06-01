@@ -1,10 +1,3 @@
-pub mod about_routes;
 pub mod auth_routes;
-pub mod bookmark_routes;
-pub mod explore_routes;
-pub mod index_routes;
-pub mod message_routes;
-pub mod notification_routes;
 pub mod profile_routes;
-pub mod timeline_routes;
 pub mod tweet_routes;

@@ -1,9 +1,16 @@
 
+use crate::authentication::errors::ErrorResponse;
+use crate::authentication::middleware::user_exists;
 use crate::config::AppState;
+use crate::errors::auth::AuthError;
+use crate::errors::profile::ProfileError;
+use crate::functions::profile::profile_from_username;
+use crate::functions::user::user_from_username;
 use crate::responses::profile::make_profile_model_response;
-use crate::responses::user::make_user_model_response;
+use crate::responses::user::{make_user_model_response, UserDetailsResponse};
 use crate::schema::{profile::ProfileModel, user::UserModel};
 use actix_web::{get, web, HttpRequest, HttpResponse};
+use serde_json::Value;
 
 #[get("/profile/{username}")]
 pub async fn profile_username(
@@ -11,65 +18,29 @@ pub async fn profile_username(
     data: web::Data<AppState>,
     // _: middleware::JwtMiddleware,
 ) -> HttpResponse {
-    // let ext = req.extensions();
-    // let user_id = ext.get::<i32>().unwrap();
-    let username: String = req
-        .path()
-        .split('/')
-        .into_iter()
-        .nth(2)
-        .unwrap()
-        .to_string();
-    let user = sqlx::query_as!(
-        UserModel,
-        "
-    SELECT 
-        user_id,
-        name,
-        role_id, 
-        username, 
-        email, 
-        created_at, 
-        dob, 
-        profile_id, 
-        password 
-    FROM USERS
-    WHERE 
-    username = ?",
-        username
-    )
-    .fetch_one(&data.db)
-    .await
-    .unwrap();
-    let profile_id = user.profile_id.unwrap();
-    let profile: ProfileModel = sqlx::query_as!(
-        ProfileModel,
-        "
-    SELECT 
-        profile_id,
-        about,
-        phone_no, 
-        location, 
-        languages
-        FROM PROFILES
-        WHERE 
-    profile_id = (?);",
-        profile_id
-    )
-    .fetch_one(&data.db)
-    .await
-    .unwrap();
-    let json_response = serde_json::json!({
-        "status":  "success",
-        "data": {
-            "profile": serde_json::json!({
-                "profile": make_profile_model_response(&profile)
-            }),
-            "user": serde_json::json!({
-                "user": make_user_model_response(&user)
-            })
-        }
-    });
+    let json_response: Value = Default::default();
+    // let username = req.query_string().split("/").last().unwrap();
+    // println!("username: {:?}", username);
+    // // match user_exists(username, email, &data) {
+    // //     todo!();
+    // // }
+    // // match profile_from_username(username.to_string(), &data).await {
+    // //     None => {
+    // //         json_response = serde_json::json!(ErrorResponse::);
+    // //         return HttpResponse::NotFound().body("Profile not found!");
+    // //     }
+    // // }
+    // let json_response = serde_json::json!({
+    //     "status":  "success",
+    //     "data": {
+    //         "profile": serde_json::json!({
+    //             "profile": make_profile_model_response(&profile)
+    //         }),
+    //         "user": serde_json::json!({
+    //             "user": make_user_model_response(&user)
+    //         })
+    //     }
+    // });
     HttpResponse::Ok().json(json_response)
 }
 

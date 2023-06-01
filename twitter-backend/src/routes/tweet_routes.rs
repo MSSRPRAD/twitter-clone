@@ -30,7 +30,7 @@ pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
         "
     SELECT 
         tweet_id,
-        user_id,
+        username,
         parent_id,
         content, 
         created_at,
@@ -42,9 +42,7 @@ pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
         views
     FROM TWEETS
     WHERE 
-    tweet_id = ?",
-        tweet_id
-    )
+    tweet_id = ?;", tweet_id)    
     .fetch_one(&data.db)
     .await
     .unwrap();
@@ -56,42 +54,4 @@ pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
         }
     });
     HttpResponse::Ok().json(json_response)
-}
-
-#[get("/twitter/{username}/status/{tweetid}/likes")]
-pub async fn view_tweet_likes() -> HttpResponse {
-    HttpResponse::Ok().body("This will soon be the view tweet likes page!")
-}
-
-#[get("/twitter/{username}/status/{tweetid}/quotes")]
-pub async fn view_quote_tweets() -> HttpResponse {
-    HttpResponse::Ok().body("This will soon be the view quote tweets page!")
-}
-
-#[get("/twitter/{username}/status/{tweetid}/analytics")]
-pub async fn tweet_analytics() -> HttpResponse {
-    HttpResponse::Ok().body("This will soon be the tweet analytics page!")
-}
-
-#[post("/twitter/maketweet")]
-pub async fn make_tweet(
-    req: HttpRequest,
-    body: web::Json<TweetCreateResponse>,
-    data: web::Data<AppState>,
-    _: middleware::JwtMiddleware,
-) -> HttpResponse {
-    let ext = req.extensions();
-    let user_id = ext.get::<i32>().unwrap();
-    // Insert tweet into db
-    let _insert_result = sqlx::query(
-        "INSERT INTO TWEETS 
-            (user_id, content) 
-        VALUES 
-            (?, ?);",
-    )
-    .bind(user_id)
-    .bind(body.content.to_string())
-    .execute(&data.db)
-    .await;
-    HttpResponse::Ok().body("This will soon be the make tweet page!")
 }

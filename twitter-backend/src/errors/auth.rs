@@ -19,6 +19,12 @@ impl ErrorResponse {
             message: "Invalid Credentials".to_string(),
         }
     }
+    pub fn NoProfile() -> Self {
+        Self {
+            status: "fail".to_string(),
+            message: "Invalid Credentials".to_string(),
+        }
+    }
     pub fn InvalidUser() -> Self {
         Self {
             status: "fail".to_string(),

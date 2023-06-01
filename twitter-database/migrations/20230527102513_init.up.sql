@@ -3,33 +3,31 @@ CREATE TABLE IF NOT EXISTS ROLES (
     role_name VARCHAR(10) UNIQUE NOT NULL
 );
 
+
+CREATE TABLE IF NOT EXISTS USERS (
+    role_id INT NOT NULL,
+    FOREIGN KEY (role_id) REFERENCES ROLES(role_id),
+    username VARCHAR(20) UNIQUE NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL, 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dob CHAR(10) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS PROFILES (
-    profile_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(20) PRIMARY KEY,
+    FOREIGN KEY (username) REFERENCES USERS(username),
     phone_no CHAR(10) UNIQUE,
     location VARCHAR(20),
     languages VARCHAR(200),
     about VARCHAR(500)
 );
 
-CREATE TABLE IF NOT EXISTS USERS (
-    user_id INT PRIMARY KEY AUTO_INCREMENT,
-    role_id INT NOT NULL,
-    FOREIGN KEY (role_id) REFERENCES ROLES(role_id),
-    username VARCHAR(20) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL, 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dob CHAR(10) NOT NULL,
-    profile_id INT UNIQUE,
-    FOREIGN KEY (profile_id) REFERENCES PROFILES(profile_id)
-);
-
-
 CREATE TABLE IF NOT EXISTS TWEETS (
     tweet_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES USERS(user_id),
+    username VARCHAR(20) NOT NULL,
+    FOREIGN KEY (username) REFERENCES USERS(username),
     parent_id INT,
     FOREIGN KEY (parent_id) REFERENCES TWEETS(tweet_id),
     content VARCHAR(300) NOT NULL,
@@ -44,28 +42,23 @@ CREATE TABLE IF NOT EXISTS TWEETS (
 );
 
 CREATE TABLE LIKES (
-    user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES USERS(user_id),
+    username VARCHAR(20) NOT NULL,
+    FOREIGN KEY (username) REFERENCES USERS(username),
     tweet_id INT NOT NULL,
     FOREIGN KEY (tweet_id) REFERENCES TWEETS(tweet_id),
-    PRIMARY KEY(user_id, tweet_id),
+    PRIMARY KEY(username, tweet_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE RETWEETS (
-    user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES USERS(user_id),
+    username VARCHAR(20) NOT NULL,
+    FOREIGN KEY (username) REFERENCES USERS(username),
     tweet_id INT NOT NULL,
     FOREIGN KEY (tweet_id) REFERENCES TWEETS(tweet_id),
-    PRIMARY KEY(user_id, tweet_id),
+    PRIMARY KEY(username, tweet_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-/*
-USER = 1
-ADMIN = 2
-MODERATOR = 3
- */
 INSERT INTO ROLES VALUES(1, "USER");
 INSERT INTO ROLES VALUES(2, "ADMIN");
 INSERT INTO ROLES VALUES(3, "MODERATOR");
