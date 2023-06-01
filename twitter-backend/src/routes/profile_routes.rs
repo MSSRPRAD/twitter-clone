@@ -1,11 +1,14 @@
 use crate::{
     config::AppState,
-    errors::auth::ErrorResponse,
-    functions::{profile::profile_from_username, user::user_from_username},
-    responses::profile::make_user_details_response,
+    errors::{auth::ErrorResponse, profile::ProfileError},
+    functions::{profile::{profile_from_username, create_or_update_profile}, user::user_from_username},
+    responses::profile::{make_user_details_response, ProfileModelResponse, make_profile_model_response}, schema::profile::ProfileModel,
 };
-use actix_web::{get, web, HttpRequest, HttpResponse};
+use actix_web::{get, web, HttpRequest, HttpResponse, Responder, post};
 use serde_json::json;
+use actix_session::Session;
+use crate::schema::user::UserModel;
+use crate::authentication::middleware::SessionValue;
 
 #[get("/profile/{username}")]
 pub async fn profile_username(
@@ -38,6 +41,34 @@ pub async fn profile_username(
             }
         }
     }
+}
+
+#[post("/profile/me")]
+pub async fn profile_me(
+    body: web::Json<ProfileModelResponse>,
+    data: web::Data<AppState>,
+    session: Session,
+) -> impl Responder {
+    println!("reached here");
+    let user: Option<SessionValue> = session.get(&"user").unwrap();
+    println!("user");
+    if let Some(_x) = &user {
+        let username = user.unwrap().username;
+        let opt_user = user_from_username(username, &data).await;
+        match opt_user {
+            None => {
+                let json_response = json!(ErrorResponse::InvalidUser());
+                return HttpResponse::NotFound().json(json_response);
+            }
+            _ => {
+                let _ = create_or_update_profile(body, data).await;
+            }
+        }
+    } else {
+        println!("user not logged in");
+    }
+
+    HttpResponse::Ok().json(json!({"status": "success"}))
 }
 
 #[get("/twitter/{username}")]

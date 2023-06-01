@@ -1,5 +1,6 @@
 use crate::config::AppState;
 use crate::errors::profile::ProfileError;
+use crate::responses::profile::ProfileModelResponse;
 use crate::schema::profile::ProfileModel;
 use actix_web::web;
 
@@ -29,6 +30,34 @@ pub async fn profile_exists(username: String, data: &web::Data<AppState>) -> Pro
             return ProfileError::NoError;
         }
     }
+}
+
+pub async fn create_or_update_profile(
+    body: web::Json<ProfileModelResponse>,
+    data: web::Data<AppState>,
+) -> ProfileError {
+    let _delete_result = sqlx::query_as!(
+        ProfileModel,
+        "DELETE FROM PROFILES WHERE username = ?;",
+        body.username,
+    )
+    .execute(&data.db)
+    .await;
+    let _insert_result = sqlx::query_as!(
+        ProfileModel,
+        "INSERT INTO PROFILES
+            (username, phone_no, location, languages, about) 
+        VALUES 
+            (?, ?, ?, ?, ?);",
+        body.username,
+        body.phone_no,
+        body.location,
+        body.languages,
+        body.about,
+    )
+    .execute(&data.db)
+    .await;
+    return ProfileError::NoError;
 }
 
 pub async fn profile_from_username(
