@@ -1,13 +1,16 @@
 use crate::{
     config::AppState,
-    errors::{auth::ErrorResponse, profile::ProfileError},
-    functions::{profile::{profile_from_username, create_or_update_profile}, user::user_from_username},
-    responses::profile::{make_user_details_response, ProfileModelResponse, make_profile_model_response}, schema::profile::ProfileModel,
+    errors::auth::ErrorResponse,
+    functions::{
+        profile::{create_or_update_profile, profile_from_username},
+        user::user_from_username,
+    },
+    responses::profile::{make_user_details_response, ProfileModelResponse},
 };
-use actix_web::{get, web, HttpRequest, HttpResponse, Responder, post};
-use serde_json::json;
 use actix_session::Session;
-use crate::schema::user::UserModel;
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use serde_json::json;
+
 use crate::authentication::middleware::SessionValue;
 
 #[get("/profile/{username}")]
