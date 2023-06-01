@@ -1,38 +1,35 @@
-use crate::config::AppState;
-
+use crate::{config::AppState, functions::{user::{self, user_from_username}, profile::profile_from_username}, errors::{profile::ProfileError, auth::ErrorResponse}, responses::profile::make_user_details_response};
 use actix_web::{get, web, HttpRequest, HttpResponse};
-use serde_json::Value;
-
+use serde_json::{Value, json};
+use crate::responses::profile::UserDetailsResponse;
 #[get("/profile/{username}")]
 pub async fn profile_username(
-    _req: HttpRequest,
-    _data: web::Data<AppState>,
+    req: HttpRequest,
+    data: web::Data<AppState>,
     // _: middleware::JwtMiddleware,
 ) -> HttpResponse {
-    let json_response: Value = Default::default();
-    // let username = req.query_string().split("/").last().unwrap();
-    // println!("username: {:?}", username);
-    // // match user_exists(username, email, &data) {
-    // //     todo!();
-    // // }
-    // // match profile_from_username(username.to_string(), &data).await {
-    // //     None => {
-    // //         json_response = serde_json::json!(ErrorResponse::);
-    // //         return HttpResponse::NotFound().body("Profile not found!");
-    // //     }
-    // // }
-    // let json_response = serde_json::json!({
-    //     "status":  "success",
-    //     "data": {
-    //         "profile": serde_json::json!({
-    //             "profile": make_profile_model_response(&profile)
-    //         }),
-    //         "user": serde_json::json!({
-    //             "user": make_user_model_response(&user)
-    //         })
-    //     }
-    // });
-    HttpResponse::Ok().json(json_response)
+    let username = req.query_string().split("/").last().unwrap();
+    let opt_user = user_from_username(username.to_string(), &data).await;
+    match opt_user {
+        None => {
+            let json_response = json!(ErrorResponse::InvalidUser());
+            return HttpResponse::NotFound().json(json_response);
+        }
+        _ => {
+            let opt_prof = profile_from_username(username.to_string(), &data).await;
+            match opt_prof {
+                None => {
+                    let json_response = json!(ErrorResponse::NoProfile());
+                    return HttpResponse::NotFound().json(json_response);
+                }
+                _ => {
+                    let details = make_user_details_response(&opt_prof.unwrap(), &opt_user.unwrap());
+                    let json_response = json!(ErrorResponse::NoError());
+                    return HttpResponse::NotFound().json(json_response);
+                }
+            }
+        }
+    }
 }
 
 #[get("/twitter/{username}")]

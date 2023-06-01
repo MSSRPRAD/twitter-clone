@@ -22,7 +22,7 @@ impl ErrorResponse {
     pub fn NoProfile() -> Self {
         Self {
             status: "fail".to_string(),
-            message: "Invalid Credentials".to_string(),
+            message: "No Profile for this user.".to_string(),
         }
     }
     pub fn InvalidUser() -> Self {
