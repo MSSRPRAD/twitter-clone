@@ -1,6 +1,5 @@
-import "./App.css";
 import { useState, useEffect } from "react";
-import UserList from "./components/UserList";
+import UserList from "../components/UserList";
 import axios from "axios";
 
 interface RegisterUserSchema {

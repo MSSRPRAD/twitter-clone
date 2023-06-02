@@ -1,3 +1,8 @@
+POST 127.0.0.1:8000/register
+content-type: application/json
+
+{"role_id": 0, "username": "fdsd", "name": "eafsd", "email": "fsdfs@gma", "password": "fdfsd"}
+###
 POST http://127.0.0.1:8000/login
 content-type: application/json
 
