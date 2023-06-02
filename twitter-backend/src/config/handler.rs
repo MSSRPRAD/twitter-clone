@@ -5,6 +5,7 @@ use crate::routes::{
         profile_me, profile_username, tweets, tweets_images, tweets_likes, tweets_with_replies,
     },
     tweet_routes::view_tweet,
+    follow_routes::follow_username,
 };
 use actix_web::web;
 
@@ -23,6 +24,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(get_me_handler)
         .service(profile_username)
         .service(profile_me)
+        .service(follow_username)
         .service(logout);
     conf.service(scope);
 }

@@ -70,7 +70,7 @@ async fn register_post(
     // Check if the user already exists
     match user_exists(body.username.to_string(), body.email.to_string(), &data).await {
         AuthError::InvalidUsernameError => {
-            return HttpResponse::Conflict().json(json!(ErrorResponse::UsernameExists()))
+            return HttpResponse::Conflict().json(json!(ErrorResponse::InvalidUser()))
         }
         AuthError::NoError => {
             let _ = register_user(body, data).await;
