@@ -39,7 +39,7 @@ pub async fn profile_username(
                     let details =
                         make_user_details_response(&opt_prof.unwrap(), &opt_user.unwrap());
                     let json_response = json!(details);
-                    return HttpResponse::NotFound().json(json_response);
+                    return HttpResponse::Ok().json(json_response);
                 }
             }
         }
