@@ -1,10 +1,5 @@
 #!/bin/bash
 
-DB_HOST="localhost"
-DB_USER="admin"
-DB_PASS="password123"
-DB_NAME="mysql-twitterdb"
-
-SQL_FILE="../migrations/20230527102513_init.up.sql"
-
-mysql -h "$DB_HOST" -u "$DB_USER" -p "$DB_PASS" "$DBNAME" < "$SQL_FILE"
+docker cp ./scripts/schema.sql 1b31be7bd292:/home/schema.sql
+docker exec -it 1b31be7bd292 sh -c "cd /home/; mysql -u admin -p mysql-twitterdb;";
+# docker exec -i 1b31be7bd292 mysql -u admin -p password123 mysql-twitterdb  <<< "SOURCE /home/schema.sql;"
