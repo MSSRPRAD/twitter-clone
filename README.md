@@ -1,31 +1,38 @@
 # twitter-clone
+
 Trying to make a Twitter clone (with it's basic functionalities) using the TRAM stack (Tailwind - React - ActixWeb - MySQL) [forgive me for the acronym :") ]
 
 ## SETUP INSTRUCTIONS (Backend and Database)
+
 The project is not well organised and the different components are still not well integrates. So you will have to do a lot of work manually for setting it up.
 
 ### Prerequisites
+
 1. Rust, Cargo must be installed.
 
 ### Setup Commands
 
 1. Clone the repository
+
 ```
 git clone https://github.com/mssrprad/twitter-clone.git;
 ```
+
 <!-- Start the MySql database through docker image -->
+
 ```
 cd twitter-clone/twitter-backend;
 docker-compose up -d;
 ```
- 
+
     Sadly the database is not integrating well with sqlx for some reason.
     Sometimes it works and sometimes it doesn't.
     Therefore it is better to create the schema directly inside the docker container.
 
     Use docker-desktop to access the mysql terminal with the credentials in the
-    .env file. Then copy paste these commands 
+    .env file. Then copy paste these commands
     (also in /home/pradyumnamalladi/twitter-clone/twitter-database/migrations/20230527102513_init.up.sql)
+
 ```
 CREATE TABLE IF NOT EXISTS ROLES (
     role_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -47,7 +54,7 @@ CREATE TABLE IF NOT EXISTS USERS (
     username VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL, 
+    email VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dob CHAR(10) NOT NULL,
     profile_id INT UNIQUE,
@@ -60,7 +67,8 @@ INSERT INTO ROLES VALUES(3, "MODERATOR");
 ```
 
 his should be enough for the database (for now).
-    Let's start the backend server now!
+Let's start the backend server now!
+
 ```
 cd ../twitter-backend/;
 cargo watch -q -c -w src/ -x run;
@@ -75,12 +83,10 @@ curl -X POST \
 127.0.0.1:8000/register
 curl -X POST \
 -H "Content-Type: application/json" \
+-d '{"role_id": 2, "name": "normaluser", "email": "user@user.com","username": "user","password": "user123","dob": "13/01/2003"}' \
+127.0.0.1:8000/register
+curl -X POST \
+-H "Content-Type: application/json" \
 -d '{"role_id": 1, "name": "normaluser", "email": "user@user.com","username": "user","password": "user123","dob": "13/01/2003"}' \
 127.0.0.1:8000/register
-curl -X POST \
--H "Content-Type: application/json" \
--d '{"role_id": 0, "name": "normaluser", "email": "user@user.com","username": "user","password": "user123","dob": "13/01/2003"}' \
-127.0.0.1:8000/register
-curl -X POST \
--H "Content-Type: application/json" \
 ```

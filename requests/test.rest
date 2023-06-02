@@ -1,4 +1,8 @@
-POST http://127.0.0.1:8000/register
+POST http://127.0.0.1:8000/login
 content-type: application/json
 
-{"role_id": 1, "name": "normaluser", "email": "user@user.com","username": "user","password": "user123","dob": "13/01/2003"}
+{"role_id": 1, "username": "user","password": "user123"}
+###
+
+GET http://127.0.0.1:8000/profile/me
+Cookie: test-session=jjd4stxAQ6hgTx0WLmCvjWKUsjeWhxBocWp3hqGHeRwXwLu1tZMkWlNWnEmmk5%2FU8EMZSE7B7aJYH7+Re5mptv38odCgIr59wjNXvXbdNVWrxBKDy9srZq6pCbw%3D

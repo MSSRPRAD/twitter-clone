@@ -1,4 +1,4 @@
-export default function Login() {
+export default function Register() {
   return (
     <>
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
