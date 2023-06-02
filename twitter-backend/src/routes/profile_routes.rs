@@ -39,7 +39,7 @@ pub async fn profile_username(
                     let details =
                         make_user_details_response(&opt_prof.unwrap(), &opt_user.unwrap());
                     let json_response = json!(details);
-                    return HttpResponse::NotFound().json(json_response);
+                    return HttpResponse::Ok().json(json_response);
                 }
             }
         }
@@ -54,7 +54,7 @@ pub async fn profile_me(
 ) -> impl Responder {
     println!("reached here");
     let user: Option<SessionValue> = session.get(&"user").unwrap();
-    println!("user");
+    // println!("user");
     if let Some(_x) = &user {
         let username = user.unwrap().username;
         let opt_user = user_from_username(username, &data).await;
@@ -68,7 +68,8 @@ pub async fn profile_me(
             }
         }
     } else {
-        println!("user not logged in");
+       let json_response = json!(ErrorResponse::NotLoggedIn());
+       return HttpResponse::Unauthorized().json(json_response);
     }
 
     HttpResponse::Ok().json(json!({"status": "success"}))

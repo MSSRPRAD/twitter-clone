@@ -14,7 +14,6 @@ use actix_session::Session;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 
 use serde_json::json;
-use sqlx::Row;
 
 #[post("/login")]
 async fn login_post(
@@ -30,9 +29,11 @@ async fn login_post(
     match auth_error {
         AuthError::InvalidUsernameError => {
             response_json = json!(ErrorResponse::InvalidUser());
+            return HttpResponse::BadRequest().json(response_json);
         }
         AuthError::WrongPasswordError => {
             response_json = json!(ErrorResponse::InvalidCredentials());
+            return HttpResponse::BadRequest().json(response_json);
         }
         AuthError::NoError => {
             let value: SessionValue = SessionValue {
@@ -42,18 +43,17 @@ async fn login_post(
             };
             let _ = session.insert("user", &value).map_err(|_| {
                 println!("could not add user to session");
-                return HttpResponse::Ok();
+                return HttpResponse::InternalServerError();
             });
             session.renew();
             response_json = json!(ErrorResponse::NoError());
+            return HttpResponse::Ok().json(response_json);
         }
         _ => {
             response_json = json!(ErrorResponse::NoError());
+            return HttpResponse::InternalServerError().json(response_json);
         }
     }
-    // If it is valid, return cookie with the session id
-    // Return token with response
-    HttpResponse::Ok().json(response_json)
 }
 
 #[get("/login")]
@@ -70,11 +70,11 @@ async fn register_post(
     // Check if the user already exists
     match user_exists(body.username.to_string(), body.email.to_string(), &data).await {
         AuthError::InvalidUsernameError => {
-            return HttpResponse::Conflict().json(json!(ErrorResponse::UsernameExists()))
+            return HttpResponse::Conflict().json(json!(ErrorResponse::InvalidUser()))
         }
         AuthError::NoError => {
             let _ = register_user(body, data).await;
-            return HttpResponse::Conflict().json(json!(ErrorResponse::NoError()));
+            return HttpResponse::Ok().json(json!(ErrorResponse::NoError()));
         }
         _ => return HttpResponse::Conflict().json(json!(ErrorResponse::InternalServerError())),
     }

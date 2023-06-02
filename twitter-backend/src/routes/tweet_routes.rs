@@ -1,4 +1,4 @@
-use crate::config::AppState;
+use crate::{config::AppState, functions::user};
 use crate::responses::tweet::make_tweet_model_response;
 
 use crate::schema::tweet::TweetModel;
@@ -10,7 +10,9 @@ pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
     let parts: Vec<&str> = req.path().split('/').collect();
     let username: String = parts[2].to_string();
     let tweet_id: i32 = parts[4].to_string().parse().unwrap();
-    let exists: bool = sqlx::query("SELECT EXISTS(SELECT 1 FROM USERS, TWEETS WHERE USERS.user_id = TWEETS.user_id AND TWEETS.tweet_id = ? AND USERS.username = ?);")
+    println!("username: {:?}", username);
+    println!("tweet_id: {:?}", tweet_id);
+    let exists: bool = sqlx::query("SELECT EXISTS(SELECT 1 FROM USERS, TWEETS WHERE USERS.username = TWEETS.username AND TWEETS.tweet_id = ? AND TWEETS.username = ?);")
         .bind(tweet_id)
         .bind(username)
         .fetch_one(&data.db)

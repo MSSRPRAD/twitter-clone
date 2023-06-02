@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS ROLES (
     role_name VARCHAR(10) UNIQUE NOT NULL
 );
 
-
 CREATE TABLE IF NOT EXISTS USERS (
     role_id INT NOT NULL,
     FOREIGN KEY (role_id) REFERENCES ROLES(role_id),
@@ -41,13 +40,14 @@ CREATE TABLE IF NOT EXISTS TWEETS (
     FOREIGN KEY (quote_id) REFERENCES TWEETS(tweet_id)
 );
 
-CREATE TABLE LIKES (
+CREATE TABLE REACTIONS (
     username VARCHAR(20) NOT NULL,
     FOREIGN KEY (username) REFERENCES USERS(username),
     tweet_id INT NOT NULL,
     FOREIGN KEY (tweet_id) REFERENCES TWEETS(tweet_id),
     PRIMARY KEY(username, tweet_id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reaction_id INT NOT NULL
 );
 
 CREATE TABLE RETWEETS (
@@ -56,6 +56,15 @@ CREATE TABLE RETWEETS (
     tweet_id INT NOT NULL,
     FOREIGN KEY (tweet_id) REFERENCES TWEETS(tweet_id),
     PRIMARY KEY(username, tweet_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS FOLLOWING (
+    username VARCHAR(20) NOT NULL,
+    FOREIGN KEY (username) REFERENCES USERS(username),
+    following VARCHAR(20) NOT NULL,
+    FOREIGN KEY (following) REFERENCES USERS(username),
+    PRIMARY KEY (username, following),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
