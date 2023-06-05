@@ -102,7 +102,7 @@ export default function Register() {
     <main class="text-center items-center mx-auto text-gray-700 p-4">
       <h1 class="text-4xl font-bold">Register</h1>
       <div id="form" class = "flex flex-auto justify-center p-10">
-            <form class="w-full max-w-lg p-20 bg-stone-100 rounded-lg">
+            <form class="w-full max-w-lg p-20 bg-white shadow-2xl rounded">
         <div class="flex flex-wrap -mx-3 mb-6">
           <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-fullname">

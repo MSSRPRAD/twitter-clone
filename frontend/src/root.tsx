@@ -16,7 +16,7 @@ import {
 } from "solid-start";
 import "./root.css";
 import Register from "./routes/register";
-import CreateOrUpdateProfile from "./routes/registerprofile";
+import Login from "./routes/login";
 
 export default function Root() {
   const location = useLocation();
@@ -39,6 +39,9 @@ export default function Root() {
                 <li class={`border-b-2 ${active("/")} mx-1.5 sm:mx-6`}>
                   <A href="/register">Register</A>
                 </li>
+                <li class={`border-b-2 ${active("/")} mx-1.5 sm:mx-6`}>
+                  <A href="/login">Login</A>
+                </li>
                 <li class={`border-b-2 ${active("/about")} mx-1.5 sm:mx-6`}>
                   <A href="/about">About</A>
                 </li>
@@ -46,8 +49,8 @@ export default function Root() {
             </nav>
             <Routes>
               <FileRoutes />
-              <Register />
-              <Route path = "/profile/me" component={CreateOrUpdateProfile}/>
+              <Route path = "/register" component={Register}/>
+              <Route path = "/login" component={Login}/>
             </Routes>
           </ErrorBoundary>
         </Suspense>
