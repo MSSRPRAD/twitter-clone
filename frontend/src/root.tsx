@@ -12,9 +12,11 @@ import {
   Routes,
   Scripts,
   Title,
+  Route,
 } from "solid-start";
 import "./root.css";
 import Register from "./routes/register";
+import CreateOrUpdateProfile from "./routes/registerprofile";
 
 export default function Root() {
   const location = useLocation();
@@ -45,6 +47,7 @@ export default function Root() {
             <Routes>
               <FileRoutes />
               <Register />
+              <Route path = "/profile/me" component={CreateOrUpdateProfile}/>
             </Routes>
           </ErrorBoundary>
         </Suspense>
