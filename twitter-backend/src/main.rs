@@ -54,16 +54,8 @@ async fn main() -> std::io::Result<()> {
     println!("Serving on 127.0.0.1:8000");
 
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allowed_origin("http://localhost:5173")
-            .allowed_origin("http://localhost:3000")
-            .allowed_methods(vec!["GET", "POST"])
-            .allowed_headers(vec![
-                header::CONTENT_TYPE,
-                header::AUTHORIZATION,
-                header::ACCEPT,
-            ])
-            .supports_credentials();
+        let cors = Cors::permissive();
+            // .supports_credentials();
         App::new()
             // redis session middleware
             .wrap(

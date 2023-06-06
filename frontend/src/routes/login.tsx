@@ -1,4 +1,4 @@
-import { Accessor } from "solid-js";
+import { Accessor, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Component, createEffect } from "solid-js";
 
@@ -16,25 +16,31 @@ curl -X POST \
 */
 
 const submit = async (form: FormFields) => {
+  const [cookie, setCookie] = createSignal('');
   // should be submitting your form to some backend service
   try {
     var data = JSON.stringify(form);
     console.log(data);
-    const response = await fetch('http://127.0.0.1:8000/login', {
+    const response = await fetch('http://localhost:8000/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: data,
+      credentials: "include", // Don't forget to specify this if you need cookies
     });
-    console.log(response);
-
     if (response.ok) {
       // Request was successful
       const data = await response.json();
       console.log(data);
+      const cookie = await response.headers.entries();
+      console.log(...cookie);
       // Process the response data here
+      console.log("set-cookie:");
+      console.log(response.headers.get('set-cookie'));
       console.log("succeeded in fetching!");
+      console.log("cookies:");
+      console.log(document.cookie);
     } else {
       // Handle error response
       const errorData = await response.json();
