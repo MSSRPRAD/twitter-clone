@@ -17,6 +17,7 @@ import {
 import "./root.css";
 import Register from "./routes/register";
 import Login from "./routes/login";
+import User from "./routes/user";
 
 export default function Root() {
   const location = useLocation();
@@ -51,6 +52,7 @@ export default function Root() {
               <FileRoutes />
               <Route path = "/register" component={Register}/>
               <Route path = "/login" component={Login}/>
+              <Route path="/users/:username" component={User} />
             </Routes>
           </ErrorBoundary>
         </Suspense>
