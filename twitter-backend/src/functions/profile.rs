@@ -11,7 +11,7 @@ use actix_web::web;
 pub async fn profile_exists(username: String, data: &web::Data<AppState>) -> ProfileError {
     let option_profile = sqlx::query_as!(
         ProfileModel,
-        "SELECT PROFILES.username, phone_no, location, languages, about
+        "SELECT PROFILES.username, phone_no, location, languages, about, profilepicurl, bannerurl
     FROM PROFILES, USERS
     WHERE 
     PROFILES.username = ?
@@ -46,14 +46,16 @@ pub async fn create_or_update_profile(
     let _insert_result = sqlx::query_as!(
         ProfileModel,
         "INSERT INTO PROFILES
-            (username, phone_no, location, languages, about) 
+            (username, phone_no, location, languages, about, profilepicurl, bannerurl) 
         VALUES 
-            (?, ?, ?, ?, ?);",
+            (?, ?, ?, ?, ?, ?, ?);",
         body.username,
         body.phone_no,
         body.location,
         body.languages,
         body.about,
+        body.profilepicurl,
+        body.bannerurl,
     )
     .execute(&data.db)
     .await;
@@ -66,7 +68,7 @@ pub async fn profile_from_username(
 ) -> Option<ProfileModel> {
     let option_profile = sqlx::query_as!(
         ProfileModel,
-        "SELECT USERS.username, phone_no, location, languages, about
+        "SELECT USERS.username, phone_no, location, languages, about, profilepicurl, bannerurl
     FROM PROFILES, USERS
     WHERE 
     USERS.username = ?

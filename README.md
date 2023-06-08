@@ -83,7 +83,7 @@ curl -X POST \
 127.0.0.1:8000/register
 curl -X POST \
 -H "Content-Type: application/json" \
--d '{"role_id": 2, "name": "normaluser", "email": "user@user.com","username": "user","password": "user123","dob": "13/01/2003"}' \
+-d '{"role_id": 2, "name": "adminuser", "email": "admin@admin.com","username": "admin","password": "admin123","dob": "13/01/2003"}' \
 127.0.0.1:8000/register
 curl -X POST \
 -H "Content-Type: application/json" \

@@ -7,4 +7,6 @@ pub struct ProfileModel {
     pub phone_no: Option<String>,
     pub location: Option<String>,
     pub languages: Option<String>,
+    pub profilepicurl: Option<String>,
+    pub bannerurl: Option<String>,
 }

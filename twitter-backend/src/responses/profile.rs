@@ -8,6 +8,8 @@ pub struct ProfileModelResponse {
     pub location: String,
     pub languages: String,
     pub about: String,
+    pub profilepicurl: Option<String>,
+    pub bannerurl: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -20,6 +22,8 @@ pub struct UserDetailsResponse {
     pub location: Option<String>,
     pub languages: Option<String>,
     pub about: Option<String>,
+    pub profilepicurl: Option<String>,
+    pub bannerurl: Option<String>,
 }
 
 pub fn make_profile_model_response(profile: &ProfileModel) -> ProfileModelResponse {
@@ -29,6 +33,8 @@ pub fn make_profile_model_response(profile: &ProfileModel) -> ProfileModelRespon
         about: profile.about.to_owned().unwrap(),
         location: profile.location.to_owned().unwrap(),
         languages: profile.languages.to_owned().unwrap(),
+        profilepicurl: profile.profilepicurl.to_owned(),
+        bannerurl: profile.bannerurl.to_owned(),
     }
 }
 
@@ -42,5 +48,7 @@ pub fn make_user_details_response(profile: &ProfileModel, user: &UserModel) -> U
         location: profile.location.to_owned(),
         languages: profile.languages.to_owned(),
         about: profile.about.to_owned(),
+        profilepicurl: profile.profilepicurl.to_owned(),
+        bannerurl: profile.bannerurl.to_owned(),
     }
 }
