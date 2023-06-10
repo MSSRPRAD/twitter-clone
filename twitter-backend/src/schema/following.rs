@@ -8,3 +8,15 @@ pub struct FollowingModel {
     pub created_at: Option<chrono::DateTime<chrono::Utc>>
 }
 
+#[allow(non_snake_case)]
+#[derive(Debug, Deserialize)]
+pub struct followers {
+    pub followers: i32,
+}
+
+#[allow(non_snake_case)]
+#[derive(Debug, Deserialize)]
+pub struct number {
+    pub number: i64,
+}
+

@@ -8,9 +8,13 @@ type UserProfileProps = {
   username: string;
   is_followed: boolean;
   follows: boolean;
+  no_of_followers: number;
+  no_of_following: number;
 };
 
 const UserProfile = (props: UserProfileProps) => {
+  console.log("props");
+  console.log(props);
   const username = props.username;
   console.log("username: " + username);
   const [userProfile, setUserProfile] = createSignal({
@@ -186,11 +190,11 @@ const UserProfile = (props: UserProfileProps) => {
                 </div>
                 <div class="pt-3 flex justify-start items-start w-full divide-x divide-gray-800 divide-solid">
                   <div class="text-center pr-3">
-                    <span class="font-bold text-black">520</span>
+                    <span class="font-bold text-black">{props.no_of_following}</span>
                     <span class="text-gray-600"> Following</span>
                   </div>
                   <div class="text-center px-3">
-                    <span class="font-bold text-black">23 </span>
+                    <span class="font-bold text-black"> {props.no_of_followers} </span>
                     <span class="text-gray-600"> Followers</span>
                   </div>
                 </div>

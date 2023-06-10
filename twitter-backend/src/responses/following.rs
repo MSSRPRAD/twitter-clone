@@ -14,4 +14,7 @@ pub struct FollowingDetailsResponse {
     pub requested: String,
     pub following: bool,
     pub is_followed: bool,
+    pub no_of_followers: i32,
+    pub no_of_following: i32,
+
 }

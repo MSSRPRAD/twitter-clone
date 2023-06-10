@@ -11,6 +11,8 @@ type FollowDetails = {
   requested: String;
   following: boolean;
   is_followed: boolean;
+  no_of_followers: number;
+  no_of_following: number;
 };
 
 async function fetchFollowDetails(username: string): Promise<FollowDetails | null> {
@@ -42,18 +44,22 @@ export default function User() {
     requested: "",
     following: false,
     is_followed: false,
+    no_of_following: 0,
+    no_of_followers: 0,
   });
 
   createEffect(async () => {
     const data = await fetchFollowDetails(username);
     if (data) {
       setFollowDetails(data);
+      console.log("follow-data:");
+      console.log(data);
     }
   });
 
   return (
     <div>
-      <UserProfile username={username} is_followed = {followDetails().is_followed} follows = {followDetails().following} />
+      <UserProfile username={username} is_followed = {followDetails().is_followed} follows = {followDetails().following} no_of_followers = {followDetails().no_of_followers} no_of_following = {followDetails().no_of_following} />
     </div>
   );
 }
