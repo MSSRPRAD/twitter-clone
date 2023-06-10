@@ -1,4 +1,5 @@
 use crate::routes::auth_routes::{get_me_handler, login_post, logout, register_post};
+use crate::routes::follow_routes::{user_me};
 use crate::routes::{
     auth_routes::{allusers, login, register},
     profile_routes::{
@@ -25,6 +26,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(profile_username)
         .service(profile_me)
         .service(follow_username)
+        .service(user_me)
         .service(logout);
     conf.service(scope);
 }

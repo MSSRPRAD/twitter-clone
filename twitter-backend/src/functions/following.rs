@@ -1,4 +1,4 @@
-use crate::errors::auth::AuthError;
+use crate::{errors::auth::AuthError, responses::following::FollowingDetailsResponse};
 use crate::responses::following::FollowingModelResponse;
 use crate::schema::following::FollowingModel;
 use crate::config::AppState;
@@ -28,4 +28,63 @@ pub async fn create_or_update_following(
     .execute(&data.db)
     .await;
     return AuthError::NoError;
+}
+
+pub async fn get_following_details_response(
+    requested_username: &str,
+    requesting_username: &str,
+    data: web::Data<AppState>,
+) -> FollowingDetailsResponse {
+
+    let mut details: FollowingDetailsResponse = FollowingDetailsResponse { requesting: requesting_username.to_string(), requested: requested_username.to_string(), following: true, is_followed: true };
+
+    let option_requesting_follows_requested = sqlx::query_as!(
+        FollowingModel,
+        "
+    SELECT
+        username,
+        following, 
+        created_at
+    FROM FOLLOWING
+    WHERE 
+    username = ? AND following = ?",
+        requesting_username,
+        requested_username,
+    )
+    .fetch_one(&data.db)
+    .await;
+    match option_requesting_follows_requested {
+        Ok(_) => {
+            // If it does, do nothing            
+        }
+        Err(_) => {
+            details.following = false;
+        }
+    }
+
+    let option_requested_follows_requesting = sqlx::query_as!(
+        FollowingModel,
+        "
+    SELECT
+        username,
+        following, 
+        created_at
+    FROM FOLLOWING
+    WHERE 
+    username = ? AND following = ?",
+        requested_username,
+        requesting_username,
+    )
+    .fetch_one(&data.db)
+    .await;
+    match option_requested_follows_requesting {
+        Ok(_) => {
+            // If it does, do nothing            
+        }
+        Err(_) => {
+            details.is_followed = false;
+        }
+    }
+
+    return details;
 }

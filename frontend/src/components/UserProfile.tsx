@@ -1,9 +1,13 @@
 import { createSignal, onCleanup } from "solid-js";
 import { VsLocation } from "solid-icons/vs";
 import { IoLanguageSharp } from "solid-icons/io";
+import { createEffect } from 'solid-js';
+
 
 type UserProfileProps = {
   username: string;
+  is_followed: boolean;
+  follows: boolean;
 };
 
 const UserProfile = (props: UserProfileProps) => {
@@ -22,8 +26,36 @@ const UserProfile = (props: UserProfileProps) => {
     bannerurl: "",
   });
 
+  const handleFollow = () => {
+    // Send the GET request to /follow/{username}
+    fetch('http://localhost:8000/follow/'+username, {
+      method: 'GET',
+      credentials: "include",
+    })
+      .then(response => {
+        // Handle the response
+        if (response.ok) {
+          // Success, do something
+          console.log('following succeeded');
+        } else {
+          // Error, handle accordingly
+          console.log('following failed');
+        }
+      })
+      .catch(error => {
+        // Handle the error
+      });
+  };
+
   onCleanup(() => {
     // Cleanup any subscriptions or resources
+  });
+
+  createEffect(() => {
+    // Cleanup the effect
+    return () => {
+      // Cleanup code
+    };
   });
 
   // Fetch the user profile data
@@ -84,9 +116,16 @@ const UserProfile = (props: UserProfileProps) => {
                 </div>
                 {/* <!-- Follow Button --> */}
                 <div class="flex flex-col text-right">
-                  {/* <button class="flex justify-center  max-h-max whitespace-nowrap focus:outline-none  focus:ring  rounded max-w-max border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex items-center hover:shadow-lg font-bold py-2 px-4 rounded-full mr-0 ml-auto">
-                    Edit Profile
-                </button> */}
+                {props.follows ? (
+                  <button class="flex justify-center bg-blue-400 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded max-w-max border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex items-center hover:shadow-lg font-bold py-2 px-4 rounded-full mr-0 ml-auto">
+                    Following
+                  </button>
+                ) : (
+                  <button onClick={handleFollow} class="flex justify-center bg-stone-200 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded max-w-max border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex items-center hover:shadow-lg font-bold py-2 px-4 rounded-full mr-0 ml-auto">
+                    Follow
+                  </button>
+                )}
+                    
                 </div>
               </div>
 
@@ -99,6 +138,13 @@ const UserProfile = (props: UserProfileProps) => {
                   <p class="text-md leading-5 font-medium text-gray-600">
                     @{userProfile().username}
                   </p>
+                  {props.is_followed ? (
+                  <button class="m-1 flex justify-center bg-stone-200 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex hover:shadow-lg font-bold py-2 px-4 rounded-full ml-0">
+                    <div class="text-blue-500 text-sm p-0">Follows you</div>
+                  </button>
+                ) : (
+                    <div></div>
+                )}
                 </div>
                 {/* <!-- Description and others --> */}
                 <div class="mt-3">
@@ -140,11 +186,11 @@ const UserProfile = (props: UserProfileProps) => {
                 </div>
                 <div class="pt-3 flex justify-start items-start w-full divide-x divide-gray-800 divide-solid">
                   <div class="text-center pr-3">
-                    <span class="font-bold text-white">520</span>
+                    <span class="font-bold text-black">520</span>
                     <span class="text-gray-600"> Following</span>
                   </div>
                   <div class="text-center px-3">
-                    <span class="font-bold text-white">23,4m </span>
+                    <span class="font-bold text-black">23 </span>
                     <span class="text-gray-600"> Followers</span>
                   </div>
                 </div>
@@ -152,14 +198,10 @@ const UserProfile = (props: UserProfileProps) => {
             </div>
             <hr class="border-gray-800" />
           </div>
-          {/* <h1>Name: {userProfile()?.name}</h1>
-            <p>dob: {userProfile()?.dob}</p>
-            <p>Phone: {userProfile()?.phone_no}</p> */}
         </div>
       ) : (
         <p>Loading user profile...</p>
       )}
-      {/* <div>Trying something:</div> */}
       <div></div>
     </div>
   );
