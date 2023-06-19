@@ -32,7 +32,7 @@ type TweetDetails = {
 
 async function fetch_follow_details(username: string): Promise<FollowDetails | null> {
   try {
-    const response = await fetch('http://localhost:8000/followdetails/'+username, {
+    const response = await fetch('http://localhost:8000/followdetails/' + username, {
       method: 'GET',
       credentials: "include",
     })
@@ -51,7 +51,7 @@ async function fetch_follow_details(username: string): Promise<FollowDetails | n
 
 async function fetch_tweets(username: string): Promise<TweetDetails | null> {
   try {
-    const response = await fetch('http://localhost:8000/twitter/'+username+'/tweets/all', {
+    const response = await fetch('http://localhost:8000/twitter/' + username + '/tweets/all', {
       method: 'GET',
       credentials: "include",
     })
@@ -102,11 +102,11 @@ export default function User() {
   });
 
   return (
-    <div class = "bg-gray-800 w-full">
-      <UserProfile username={username} is_followed = {followDetails().is_followed} follows = {followDetails().following} no_of_followers = {followDetails().no_of_followers} no_of_following = {followDetails().no_of_following} />
+    <div class="bg-gray-800 w-full">
+      <UserProfile username={username} is_followed={followDetails().is_followed} follows={followDetails().following} no_of_followers={followDetails().no_of_followers} no_of_following={followDetails().no_of_following} />
       <ul class="list-none bg-gray-700">
         <li>
-          <TweetCard tweets = {tweets().tweets} username={username}/>
+          <TweetCard tweets={tweets().tweets} username={username} />
         </li>
       </ul>
     </div>

@@ -32,7 +32,7 @@ const UserProfile = (props: UserProfileProps) => {
 
   const handleFollow = () => {
     // Send the GET request to /follow/{username}
-    fetch('http://localhost:8000/follow/'+username, {
+    fetch('http://localhost:8000/follow/' + username, {
       method: 'GET',
       credentials: "include",
     })
@@ -120,16 +120,16 @@ const UserProfile = (props: UserProfileProps) => {
                 </div>
                 {/* <!-- Follow Button --> */}
                 <div class="flex flex-col text-right">
-                {props.follows ? (
-                  <button class="flex justify-center bg-blue-400 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded max-w-max border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex items-center hover:shadow-lg font-bold py-2 px-4 rounded-full mr-0 ml-auto">
-                    Following
-                  </button>
-                ) : (
-                  <button onClick={handleFollow} class="flex justify-center bg-stone-200 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded max-w-max border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex items-center hover:shadow-lg font-bold py-2 px-4 rounded-full mr-0 ml-auto">
-                    Follow
-                  </button>
-                )}
-                    
+                  {props.follows ? (
+                    <button class="flex justify-center bg-blue-400 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded max-w-max border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex items-center hover:shadow-lg font-bold py-2 px-4 rounded-full mr-0 ml-auto">
+                      Following
+                    </button>
+                  ) : (
+                    <button onClick={handleFollow} class="flex justify-center bg-stone-200 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded max-w-max border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex items-center hover:shadow-lg font-bold py-2 px-4 rounded-full mr-0 ml-auto">
+                      Follow
+                    </button>
+                  )}
+
                 </div>
               </div>
 
@@ -143,12 +143,12 @@ const UserProfile = (props: UserProfileProps) => {
                     @{userProfile().username}
                   </p>
                   {props.is_followed ? (
-                  <button class="m-1 flex justify-center bg-stone-200 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex hover:shadow-lg font-bold py-2 px-4 rounded-full ml-0">
-                    <div class="text-blue-500 text-sm p-0">Follows you</div>
-                  </button>
-                ) : (
+                    <button class="m-1 flex justify-center bg-stone-200 max-h-max whitespace-nowrap focus:outline-none  focus:ring rounded border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex hover:shadow-lg font-bold py-2 px-4 rounded-full ml-0">
+                      <div class="text-blue-500 text-sm p-0">Follows you</div>
+                    </button>
+                  ) : (
                     <div></div>
-                )}
+                  )}
                 </div>
                 {/* <!-- Description and others --> */}
                 <div class="mt-3">
@@ -157,7 +157,7 @@ const UserProfile = (props: UserProfileProps) => {
                   </p>
                   <div class="text-stone-300 flex">
                     <span class="flex mr-2">
-                      <IoLanguageSharp class="text-white"/>
+                      <IoLanguageSharp class="text-white" />
                       <span class="leading-5 ml-1">
                         {userProfile().languages}
                       </span>
