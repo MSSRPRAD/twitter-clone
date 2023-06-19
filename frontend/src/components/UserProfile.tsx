@@ -137,9 +137,9 @@ const UserProfile = (props: UserProfileProps) => {
               <div class="space-y-1 justify-center w-full mt-3 ml-3">
                 {/* <!-- User basic--> */}
                 <div>
-                  <p class="font-bold text-xl">{userProfile().name}</p>
+                  <p class="font-bold text-white text-xl">{userProfile().name}</p>
                   {/* <h2 class="text-xl leading-6 font-bold text-white">{userProfile()?.languages}</h2> */}
-                  <p class="text-md leading-5 font-medium text-gray-600">
+                  <p class="text-md leading-5 font-medium text-stone-100">
                     @{userProfile().username}
                   </p>
                   {props.is_followed ? (
@@ -152,12 +152,12 @@ const UserProfile = (props: UserProfileProps) => {
                 </div>
                 {/* <!-- Description and others --> */}
                 <div class="mt-3">
-                  <p class="text-stone-800 leading-tight mb-2">
+                  <p class="text-stone-200 leading-tight mb-2">
                     {userProfile().about}
                   </p>
-                  <div class="text-gray-600 flex">
+                  <div class="text-stone-300 flex">
                     <span class="flex mr-2">
-                      <IoLanguageSharp />
+                      <IoLanguageSharp class="text-white"/>
                       <span class="leading-5 ml-1">
                         {userProfile().languages}
                       </span>
@@ -190,12 +190,12 @@ const UserProfile = (props: UserProfileProps) => {
                 </div>
                 <div class="pt-3 flex justify-start items-start w-full divide-x divide-gray-800 divide-solid">
                   <div class="text-center pr-3">
-                    <span class="font-bold text-black">{props.no_of_following}</span>
-                    <span class="text-gray-600"> Following</span>
+                    <span class="font-bold text-white">{props.no_of_following}</span>
+                    <span class="text-stone-200"> Following</span>
                   </div>
                   <div class="text-center px-3">
-                    <span class="font-bold text-black"> {props.no_of_followers} </span>
-                    <span class="text-gray-600"> Followers</span>
+                    <span class="font-bold text-white"> {props.no_of_followers} </span>
+                    <span class="text-stone-200"> Followers</span>
                   </div>
                 </div>
               </div>
