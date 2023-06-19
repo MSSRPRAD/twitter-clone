@@ -1,5 +1,7 @@
+use crate::authentication::middleware::user_exists;
+use crate::errors::auth::AuthError;
 use crate::{config::AppState, functions::user};
-use crate::responses::tweet::make_tweet_model_response;
+use crate::responses::tweet::{make_tweet_model_response, TweetModelResponse};
 
 use crate::schema::tweet::TweetModel;
 use actix_web::{get, web, HttpRequest, HttpResponse};
@@ -56,4 +58,55 @@ pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
         }
     });
     HttpResponse::Ok().json(json_response)
+}
+
+
+#[get("/twitter/{username}/tweets/all")]
+pub async fn view_tweet_user(req: HttpRequest, data: web::Data<AppState>) -> HttpResponse {
+    let parts: Vec<&str> = req.path().split('/').collect();
+    let username: String = parts[2].to_string();
+    println!("username: {:?}", username);
+    match user_exists(username.clone(),"foo@foo.com".to_string(), &data).await{
+        AuthError::UserExistsError => {
+            let tweets: Vec<TweetModel> = sqlx::query_as!(
+                TweetModel,
+                "
+            SELECT 
+                tweet_id,
+                username,
+                parent_id,
+                content, 
+                created_at,
+                likes,
+                quote_id,
+                quotes,
+                replies,
+                retweets,
+                views
+            FROM TWEETS
+            WHERE 
+            username = ?;",
+                username
+            )
+            .fetch_all(&data.db)
+            .await
+            .unwrap();
+        let tweet_responses = tweets
+        .into_iter()
+        .map(|tweet| make_tweet_model_response(&tweet))
+        .collect::<Vec<TweetModelResponse>>();
+        let json_response = serde_json::json!({
+            "status": "success",
+            "results": tweet_responses.len(),
+            "tweets": tweet_responses
+        });
+        HttpResponse::Ok().json(json_response)
+        }
+        _ => {
+            println!("user {} does not exist", username);
+            return HttpResponse::Conflict().json(
+                serde_json::json!({"status": "fail","message": "This user does not exist in database."}),
+            );
+        }
+    }
 }

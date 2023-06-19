@@ -61,7 +61,7 @@ pub async fn register_user(
 }
 
 pub async fn user_exists(username: String, email: String, data: &web::Data<AppState>) -> AuthError {
-    let option_user = sqlx::query_as!(
+    let option_user_username = sqlx::query_as!(
         UserModel,
         "
     SELECT
@@ -74,18 +74,35 @@ pub async fn user_exists(username: String, email: String, data: &web::Data<AppSt
         password 
     FROM USERS
     WHERE 
-    username = ? AND email = ?",
-        username,
+    username = ?",
+        username
+    )
+    .fetch_one(&data.db)
+    .await;
+    let option_user_email = sqlx::query_as!(
+        UserModel,
+        "
+    SELECT
+        name,
+        role_id, 
+        username, 
+        email, 
+        created_at, 
+        dob, 
+        password 
+    FROM USERS
+    WHERE 
+    email = ?",
         email
     )
     .fetch_one(&data.db)
     .await;
-    match option_user {
-        Ok(_) => {
-            // If it does, return an error
+    match (option_user_username, option_user_email) {
+        (Ok(_), _) | (_, Ok(_)) => {
+            // If either username or email exists, return an error
             return AuthError::UserExistsError;
         }
-        Err(_) => {
+        _ => {
             return AuthError::NoError;
         }
     }
