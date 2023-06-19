@@ -2,6 +2,7 @@ import { useParams } from "@solidjs/router";
 import UserProfile from "~/components/UserProfile";
 import { createSignal, createEffect } from 'solid-js';
 import TweetCard from "~/components/TweetCard";
+import CreateTweetCard from "~/components/CreateTweetCard";
 
 type UserProps = {
   username: string;
@@ -104,7 +105,10 @@ export default function User() {
   return (
     <div class="bg-gray-800 w-full">
       <UserProfile username={username} is_followed={followDetails().is_followed} follows={followDetails().following} no_of_followers={followDetails().no_of_followers} no_of_following={followDetails().no_of_following} />
-      <ul class="list-none bg-gray-700">
+      <div class="flex items-center">
+        <CreateTweetCard />
+      </div>
+      <ul class="list-none">
         <li>
           <TweetCard tweets={tweets().tweets} username={username} />
         </li>

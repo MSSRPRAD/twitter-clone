@@ -22,7 +22,7 @@ export default function TweetCard(props: TweetCardProps) {
             <ul>
                 {props.tweets.map((tweet) => (
                     <li>
-                        <article class="transition duration-350 ease-in-out">
+                        <article class="transition duration-350 ease-in-out border-stone-100 border-2 border-b-0 border-r-0 shadow-sm">
                             <div class="flex flex-shrink-0 p-4 pb-0">
                                 <a href="#" class="flex-shrink-0 group block">
                                     <div class="flex items-center">
