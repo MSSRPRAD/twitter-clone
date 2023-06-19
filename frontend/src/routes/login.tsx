@@ -1,19 +1,13 @@
 import { Accessor, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Component, createEffect } from "solid-js";
+import { redirect, useNavigate } from "solid-start";
 
 type FormFields = {
   username: string;
   password: string;
   role_id: number;
 };
-
-/*
-curl -X POST \
--H "Content-Type: application/json" \
--d '{"role_id":1,"name":"Pradyumna Malladi","username":"mssrprad","password":"password123","dob":"2003-01-13","email":"f20210367@hyderabad.bits-pilani.ac.in"}' \
-127.0.0.1:8000/register
-*/
 
 const submit = async (form: FormFields) => {
   const [cookie, setCookie] = createSignal('');
@@ -54,6 +48,8 @@ const submit = async (form: FormFields) => {
     console.log("failed in fetching!");
   }
   console.log(`submitting ${JSON.stringify(form)}`);
+
+  
 };
 
 const useForm = () => {
