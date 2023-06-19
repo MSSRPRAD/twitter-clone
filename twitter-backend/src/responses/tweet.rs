@@ -16,6 +16,14 @@ pub struct TweetModelResponse {
     pub quote_id: Option<i32>,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CreateTweetModelResponse {
+    pub username: String,
+    pub parent_id: Option<i32>,
+    pub content: String,
+    pub quote_id: Option<i32>,
+}
+
 pub fn make_tweet_model_response(tweet: &TweetModel) -> TweetModelResponse {
     TweetModelResponse {
         username: tweet.username.to_owned(),

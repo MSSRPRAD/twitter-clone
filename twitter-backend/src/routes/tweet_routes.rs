@@ -1,10 +1,14 @@
-use crate::authentication::middleware::user_exists;
-use crate::errors::auth::AuthError;
+use crate::authentication::middleware::{user_exists, SessionValue};
+use crate::errors::auth::{AuthError, ErrorResponse};
+use crate::functions::tweet::create_tweet;
+use crate::functions::user::user_from_username;
 use crate::{config::AppState, functions::user};
-use crate::responses::tweet::{make_tweet_model_response, TweetModelResponse};
+use crate::responses::tweet::{make_tweet_model_response, TweetModelResponse, CreateTweetModelResponse};
 
 use crate::schema::tweet::TweetModel;
-use actix_web::{get, web, HttpRequest, HttpResponse};
+use actix_session::Session;
+use actix_web::{get, web, HttpRequest, HttpResponse, post, Responder};
+use serde_json::json;
 use sqlx::Row;
 
 #[get("/twitter/{username}/status/{tweetid}")]
@@ -109,4 +113,33 @@ pub async fn view_tweet_user(req: HttpRequest, data: web::Data<AppState>) -> Htt
             );
         }
     }
+}
+
+#[post("/tweets/me")]
+pub async fn tweet_me(
+    body: web::Json<CreateTweetModelResponse>,
+    data: web::Data<AppState>,
+    session: Session,
+) -> impl Responder {
+    println!("reached here");
+    let user: Option<SessionValue> = session.get(&"user").unwrap();
+    // println!("user");
+    if let Some(_x) = &user {
+        let username = user.unwrap().username;
+        let opt_user = user_from_username(username, &data).await;
+        match opt_user {
+            None => {
+                let json_response = json!(ErrorResponse::InvalidUser());
+                return HttpResponse::NotFound().json(json_response);
+            }
+            _ => {
+                let _ = create_tweet(body, data).await;
+            }
+        }
+    } else {
+       let json_response = json!(ErrorResponse::NotLoggedIn());
+       return HttpResponse::Unauthorized().json(json_response);
+    }
+
+    HttpResponse::Ok().json(json!({"status": "success"}))
 }
