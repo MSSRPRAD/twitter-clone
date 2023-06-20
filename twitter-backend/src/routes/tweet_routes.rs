@@ -89,7 +89,9 @@ pub async fn view_tweet_user(req: HttpRequest, data: web::Data<AppState>) -> Htt
                 views
             FROM TWEETS
             WHERE 
-            username = ?;",
+            username = ?
+            ORDER BY
+            created_at DESC;",
                 username
             )
             .fetch_all(&data.db)
@@ -121,19 +123,19 @@ pub async fn tweet_me(
     data: web::Data<AppState>,
     session: Session,
 ) -> impl Responder {
-    println!("reached here");
+    println!("reached create tweet");
     let user: Option<SessionValue> = session.get(&"user").unwrap();
-    // println!("user");
+    println!("user: {:?}", user);
     if let Some(_x) = &user {
         let username = user.unwrap().username;
-        let opt_user = user_from_username(username, &data).await;
+        let opt_user = user_from_username(username.clone(), &data).await;
         match opt_user {
             None => {
                 let json_response = json!(ErrorResponse::InvalidUser());
                 return HttpResponse::NotFound().json(json_response);
             }
             _ => {
-                let _ = create_tweet(body, data).await;
+                let _ = create_tweet(body, data, username).await;
             }
         }
     } else {

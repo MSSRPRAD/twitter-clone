@@ -106,7 +106,7 @@ export default function User() {
     <div class="bg-gray-800 w-full">
       <UserProfile username={username} is_followed={followDetails().is_followed} follows={followDetails().following} no_of_followers={followDetails().no_of_followers} no_of_following={followDetails().no_of_following} />
       <div class="flex items-center">
-        <CreateTweetCard />
+        <CreateTweetCard quote_id={null} parent_id={null}/>
       </div>
       <ul class="list-none">
         <li>

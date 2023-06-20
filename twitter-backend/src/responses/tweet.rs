@@ -18,7 +18,6 @@ pub struct TweetModelResponse {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CreateTweetModelResponse {
-    pub username: String,
     pub parent_id: Option<i32>,
     pub content: String,
     pub quote_id: Option<i32>,
