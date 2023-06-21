@@ -13,6 +13,7 @@ pub struct ErrorResponse {
 }
 
 impl ErrorResponse {
+    
     pub fn InvalidCredentials() -> Self {
         Self {
             status: "fail".to_string(),

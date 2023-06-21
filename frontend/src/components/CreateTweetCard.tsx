@@ -30,7 +30,8 @@ export default function CreateTweetCard(props: CreateTweetCardProps) {
         body: JSON.stringify(tweetData),
         credentials: "include", // Don't forget to specify this if you need cookies
       });
-    console.log(response);
+    console.log("create tweet's response:");
+    console.log(await response.json());
   };
 
   return (

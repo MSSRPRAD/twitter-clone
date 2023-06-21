@@ -25,6 +25,7 @@ actix-session = {version= "0.7.2", features = ["redis-actor-session", "redis-rs-
 openssl = "0.10.53"
 time = "0.3.21"
 deadpool-redis = "0.12.0"
+async-recursion = "1.0.4"
 
 # Our library
 [lib]
