@@ -1,6 +1,6 @@
 use crate::authentication::middleware::{user_exists, SessionValue};
 use crate::errors::auth::{AuthError, ErrorResponse};
-use crate::functions::tweet::{create_tweet, most_recent_tweet_from_username};
+use crate::functions::tweet::{create_tweet, most_recent_tweet_from_username, tweet_quoted};
 use crate::functions::user::user_from_username;
 use crate::{config::AppState, functions::user};
 use crate::responses::tweet::{make_tweet_model_response, TweetModelResponse, CreateTweetModelResponse};
@@ -101,10 +101,18 @@ pub async fn view_tweet_user(req: HttpRequest, data: web::Data<AppState>) -> Htt
         .into_iter()
         .map(|tweet| make_tweet_model_response(&tweet))
         .collect::<Vec<TweetModelResponse>>();
+        let mut quoted_tweets = Vec::new();
+        for tweet in &tweet_responses{
+            if tweet.quote_id.is_some(){
+                quoted_tweets.push(make_tweet_model_response(&tweet_quoted(tweet.quote_id.unwrap(), &data).await.unwrap()));
+            }
+        }
+        println!("quoted tweets: {:?}", quoted_tweets);
         let json_response = serde_json::json!({
             "status": "success",
             "results": tweet_responses.len(),
-            "tweets": tweet_responses
+            "tweets": tweet_responses,
+            "quoted_tweets": quoted_tweets,
         });
         HttpResponse::Ok().json(json_response)
         }
