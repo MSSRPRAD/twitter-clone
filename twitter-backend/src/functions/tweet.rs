@@ -21,6 +21,34 @@ pub async fn create_tweet(
     )
     .execute(&data.db)
     .await;
+    // Increase the quotes of the quoted tweet
+    // and the replies of the parent tweet
+    match body.quote_id {
+        Some(quote_id) => {
+            let _update_result = sqlx::query!(
+                "UPDATE TWEETS
+                SET quotes = quotes + 1
+                WHERE tweet_id = ?;",
+                quote_id,
+            )
+            .execute(&data.db)
+            .await;
+        }
+        None => {}
+    }
+    match body.parent_id {
+        Some(parent_id) => {
+            let _update_result = sqlx::query!(
+                "UPDATE TWEETS
+                SET replies = replies + 1
+                WHERE tweet_id = ?;",
+                parent_id,
+            )
+            .execute(&data.db)
+            .await;
+        }
+        None => {}
+    }
     return AuthError::NoError;
 }
 
