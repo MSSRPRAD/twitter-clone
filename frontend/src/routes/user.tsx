@@ -8,6 +8,10 @@ type UserProps = {
   username: string;
 };
 
+type Data = {
+  tweets: TweetDetails[];
+}
+
 type FollowDetails = {
   requesting: String;
   requested: String;
@@ -58,6 +62,8 @@ async function fetch_tweets(username: string): Promise<TweetDetails | null> {
     })
     if (response.ok) {
       const data = await response.json();
+      console.log("data");
+      console.log(data);
       return data as TweetDetails;
     } else {
       console.error('Error fetching tweets:', response.status);
@@ -87,6 +93,12 @@ export default function User() {
     tweets: [],
   });
 
+  const [profileUrl, setProfileUrl] = createSignal("");
+  // const test = profileUrl();
+  const addUrl = (url: string) => {
+    setProfileUrl(url);
+  }
+
   createEffect(async () => {
     const follow_details = await fetch_follow_details(username);
     if (follow_details) {
@@ -97,20 +109,24 @@ export default function User() {
     const tweets = await fetch_tweets(username);
     if (tweets) {
       setTweets(tweets);
-      console.log("follow-data:");
-      console.log(tweets);
     }
   });
 
+  const addTweet = (tweet: TweetDetails) => {
+    setTweets((prev) => {
+      return { tweets: [tweet, ...prev.tweets] };
+    });
+  }
+
   return (
     <div class="bg-gray-800 w-full">
-      <UserProfile username={username} is_followed={followDetails().is_followed} follows={followDetails().following} no_of_followers={followDetails().no_of_followers} no_of_following={followDetails().no_of_following} />
+      <UserProfile username={username} is_followed={followDetails().is_followed} follows={followDetails().following} addUrl={addUrl} no_of_followers={followDetails().no_of_followers} no_of_following={followDetails().no_of_following} />
       <div class="flex items-center">
-        <CreateTweetCard quote_id={null} parent_id={null}/>
+        <CreateTweetCard quote_id={null} parent_id={null} addTweet = {addTweet} />
       </div>
       <ul class="list-none">
         <li>
-          <TweetCard tweets={tweets().tweets} username={username} />
+          <TweetCard quote_tweets={[]} tweets={tweets().tweets} username={username} profileUrl = {profileUrl()} />
         </li>
       </ul>
     </div>

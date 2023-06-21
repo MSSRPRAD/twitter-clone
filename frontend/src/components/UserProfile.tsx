@@ -1,4 +1,4 @@
-import { createSignal, onCleanup } from "solid-js";
+import { Setter, createSignal, onCleanup } from "solid-js";
 import { VsLocation } from "solid-icons/vs";
 import { IoLanguageSharp } from "solid-icons/io";
 import { createEffect } from 'solid-js';
@@ -10,6 +10,7 @@ type UserProfileProps = {
   follows: boolean;
   no_of_followers: number;
   no_of_following: number;
+  addUrl: Setter<string>;
 };
 
 const UserProfile = (props: UserProfileProps) => {
@@ -80,8 +81,9 @@ const UserProfile = (props: UserProfileProps) => {
     } catch (error) {
       console.error("Error fetching user profile:", error);
     }
+    props.addUrl(userProfile().profilepicurl);
   };
-
+  
   fetchUserProfile(); // Fetch the user profile data on component mount
   const profile = JSON.stringify(userProfile);
   console.log("profile");

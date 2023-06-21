@@ -1,7 +1,10 @@
 type TweetCardProps = {
     tweets: Tweet[];
+    quote_tweets: Tweet[];
     username: string;
+    profileUrl: string;
 };
+
 type Tweet = {
     content: string;
     created_at: string;
@@ -17,6 +20,10 @@ type Tweet = {
 };
 
 export default function TweetCard(props: TweetCardProps) {
+    console.log("tweetcard props - tweets");
+    console.log(props.tweets);
+    // console.log("tweetcard props - quote_tweets");
+    // console.log(props.quote_tweets);
     return (
         <div>
             <ul>
@@ -27,7 +34,7 @@ export default function TweetCard(props: TweetCardProps) {
                                 <a href="#" class="flex-shrink-0 group block">
                                     <div class="flex items-center">
                                         <div>
-                                            <img class="inline-block h-10 w-10 rounded-full" src="https://pbs.twimg.com/profile_images/1121328878142853120/e-rpjoJi_bigger.png" alt="" />
+                                            <img class="inline-block h-10 w-10 rounded-full" src={props.profileUrl} alt="" />
                                         </div>
                                         <div class="ml-3">
                                             <p class="text-base leading-6 font-medium text-stone-200">
@@ -59,6 +66,7 @@ export default function TweetCard(props: TweetCardProps) {
                                             <TweetCard
                                                 tweets={props.tweets.filter((tweet1) => tweet1.tweet_id === tweet.quote_id)}
                                                 username={props.username}
+                                                profileUrl={props.profileUrl}
                                             />
                                         </div>
                                     ) : null}
