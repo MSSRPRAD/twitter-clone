@@ -11,3 +11,5 @@ type Tweet = {
     username: string;
     views: number;
 };
+
+export default Tweet
