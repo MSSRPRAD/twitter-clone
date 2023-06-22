@@ -209,6 +209,39 @@ pub async fn parent_tweet_chain_from_tweetid(
     }
 }
 
+pub async fn tweet_from_tweet_id(tweet_id: i32, data: &web::Data<AppState>) -> Option<TweetModel> {
+    let option_tweet: Result<TweetModel, sqlx::Error> = sqlx::query_as!(
+        TweetModel,
+        "SELECT 
+        tweet_id,
+        username,
+        parent_id,
+        content,
+        created_at,
+        likes,
+        retweets,
+        quotes,
+        views,
+        replies,
+        quote_id
+    FROM TWEETS
+    WHERE
+    tweet_id = ?;",
+        tweet_id
+    )
+    .fetch_one(&data.db)
+    .await;
+
+    match option_tweet {
+        Ok(_) => {
+            return Option::from(option_tweet.unwrap());
+        }
+        Err(_) => {
+            return None;
+        }
+    }
+}
+
 pub async fn tweet_quoted(quote_id: i32, data: &web::Data<AppState>) -> Option<TweetModel> {
     let option_tweet: Result<TweetModel, sqlx::Error> = sqlx::query_as!(
         TweetModel,

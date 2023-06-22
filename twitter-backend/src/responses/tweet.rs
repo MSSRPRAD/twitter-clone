@@ -1,7 +1,7 @@
 use crate::schema::tweet::TweetModel;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TweetModelResponse {
     pub username: String,
     pub tweet_id: i32,

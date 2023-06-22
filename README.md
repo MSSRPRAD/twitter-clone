@@ -90,3 +90,12 @@ curl -X POST \
 -d '{"role_id": 1, "name": "normaluser", "email": "user@user.com","username": "user","password": "user123","dob": "13/01/2003"}' \
 127.0.0.1:8000/register
 ```
+
+
+TODO:
+
+- Make a OpenAPI Document
+- Fix Rust Errors
+- Make Route Handler Solid
+- Performance Measure when getting one vs many
+- Quoted Tweet Profile Picture

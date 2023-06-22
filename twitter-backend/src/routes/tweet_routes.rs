@@ -1,6 +1,6 @@
 use crate::authentication::middleware::{user_exists, SessionValue};
 use crate::errors::auth::{AuthError, ErrorResponse};
-use crate::functions::tweet::{create_tweet, most_recent_tweet_from_username, tweet_quoted};
+use crate::functions::tweet::{create_tweet, most_recent_tweet_from_username, tweet_quoted, tweet_from_tweet_id};
 use crate::functions::user::user_from_username;
 use crate::{config::AppState, functions::user};
 use crate::responses::tweet::{make_tweet_model_response, TweetModelResponse, CreateTweetModelResponse};
@@ -64,6 +64,46 @@ pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
     HttpResponse::Ok().json(json_response)
 }
 
+#[get("/twitter/{tweetid}/quoted")]
+pub async fn get_quoted(req: HttpRequest, data: web::Data<AppState>) -> HttpResponse {
+    let parts: Vec<&str> = req.path().split('/').collect();
+    let tweet_id: i32 = parts[2].parse().unwrap();
+    let tweet = tweet_from_tweet_id(tweet_id, &data).await;
+    match tweet {
+        Some(tweet) => {
+            match tweet.quote_id {
+                Some(quote_id) => {
+                    let quoted_tweet = tweet_from_tweet_id(quote_id, &data).await;
+                    match quoted_tweet {
+                        Some(quoted_tweet) => {
+                            let json_response = serde_json::json!({
+                                "data": {
+                                    "tweet": make_tweet_model_response(&quoted_tweet)
+                                }
+                            });
+                            HttpResponse::Ok().json(json_response)
+                        }
+                        None => {
+                            return HttpResponse::NoContent().json(
+                                serde_json::json!({"status": "fail","message": "This tweet does not exist."}),
+                            );
+                        }
+                    }
+                }
+                None => {
+                    return HttpResponse::NoContent().json(
+                        serde_json::json!({"status": "fail","message": "This tweet has no quotes."}),
+                    );
+                }
+            }
+        }
+        None => {
+            return HttpResponse::NoContent().json(
+                serde_json::json!({"status": "fail","message": "This tweet does not exist."}),
+            );
+        }
+    }
+}
 
 #[get("/twitter/{username}/tweets/all")]
 pub async fn view_tweet_user(req: HttpRequest, data: web::Data<AppState>) -> HttpResponse {
@@ -97,23 +137,30 @@ pub async fn view_tweet_user(req: HttpRequest, data: web::Data<AppState>) -> Htt
             .fetch_all(&data.db)
             .await
             .unwrap();
-        let tweet_responses = tweets
+        let mut tweet_responses = tweets
         .into_iter()
         .map(|tweet| make_tweet_model_response(&tweet))
         .collect::<Vec<TweetModelResponse>>();
-        let mut quoted_tweets = Vec::new();
-        for tweet in &tweet_responses{
-            if tweet.quote_id.is_some(){
-                quoted_tweets.push(make_tweet_model_response(&tweet_quoted(tweet.quote_id.unwrap(), &data).await.unwrap()));
+        // println!("quoted tweets: {:?}", quoted_tweets);
+        let mut quoted_tweets = std::collections::HashMap::new();
+        for tweet in &mut tweet_responses.iter().filter(|tweet| tweet.quote_id.is_some()) {
+        let quoted_tweet = tweet_from_tweet_id(tweet.quote_id.unwrap(), &data).await;
+            match quoted_tweet {
+                Some(quoted_tweet) => {
+                    quoted_tweets.insert(quoted_tweet.tweet_id, make_tweet_model_response(&quoted_tweet));
+                }
+                None => {
+                    println!("quoted tweet does not exist");
+                }
             }
         }
-        println!("quoted tweets: {:?}", quoted_tweets);
         let json_response = serde_json::json!({
             "status": "success",
             "results": tweet_responses.len(),
             "tweets": tweet_responses,
             "quoted_tweets": quoted_tweets,
         });
+        println!("{:?}", json_response);
         HttpResponse::Ok().json(json_response)
         }
         _ => {

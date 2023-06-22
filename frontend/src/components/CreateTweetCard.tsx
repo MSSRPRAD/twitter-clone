@@ -3,7 +3,7 @@ import { Setter, createSignal } from 'solid-js';
 interface CreateTweetCardProps {
   parent_id: number | null;
   quote_id: number | null;
-  addTweet: Setter<Tweet | null>;
+  addTweet: (tweet: Tweet) => void;
 }
 
 type Tweet = {

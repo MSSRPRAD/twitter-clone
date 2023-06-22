@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{http::header, middleware::Logger, web, App, HttpServer};
+use actix_web::{middleware::Logger, web, App, HttpServer};
 use sqlx::mysql::MySqlPoolOptions;
 // Import the AppState type
 use actix_session::storage::RedisActorSessionStore;

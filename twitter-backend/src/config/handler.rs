@@ -1,7 +1,7 @@
 use crate::routes::auth_routes::{get_me_handler, login_post, logout, register_post};
 use crate::routes::follow_routes::{user_me};
 use crate::routes::test_routes::test_route;
-use crate::routes::tweet_routes::{view_tweet_user, tweet_me};
+use crate::routes::tweet_routes::{view_tweet_user, tweet_me, get_quoted};
 use crate::routes::{
     auth_routes::{allusers, login, register},
     profile_routes::{
@@ -32,6 +32,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(view_tweet_user)
         .service(tweet_me)
         .service(test_route)
+        .service(get_quoted)
         .service(logout);
     conf.service(scope);
 }
