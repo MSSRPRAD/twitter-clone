@@ -13,7 +13,13 @@ pub struct ErrorResponse {
 }
 
 impl ErrorResponse {
-    
+    pub fn InvalidTweet() -> Self {
+        Self {
+            status: "fail".to_string(),
+            message: "Tweet doesn't exist".to_string(),
+        }
+    }
+
     pub fn InvalidCredentials() -> Self {
         Self {
             status: "fail".to_string(),

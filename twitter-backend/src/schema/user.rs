@@ -12,6 +12,11 @@ pub struct UserModel {
     pub password: String,
 }
 
+#[derive(Debug, Clone, Copy, sqlx::FromRow)]
+pub struct UserId {
+    pub user_id: i32,
+}
+
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize)]
 pub struct LoginUserSchema {

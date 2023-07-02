@@ -1,17 +1,17 @@
 use actix_web::{HttpResponse, HttpRequest, get, web};
 use serde_json::json;
 
-use crate::{functions, config::AppState};
+use crate::{functions::{self, tweet::timeline_for_user}, config::AppState};
 
-#[get("/test/{tweet_id}")]
+#[get("/test/{username}")]
 pub async fn test_route(
     req: HttpRequest,
     data: web::Data<AppState>,
 ) -> HttpResponse {
     let temp = req.uri().to_string();
-    let tweet_id = temp.split("/").last().unwrap();
-    // println!("{:?}", tweet_id);
-    let tweet_chain = functions::tweet::parent_tweet_chain_from_tweetid(tweet_id.parse::<i32>().unwrap(), None, &data).await;
-    // println!("{:?}", tweet_chain);
-    HttpResponse::Ok().body(format!("This will soon be the tweets page! {:?}", tweet_chain))
+    let username = temp.split("/").last().unwrap();
+    // println!("username: {:?}", username);
+    let timeline_tweets = timeline_for_user(username.to_string(), &data).await; 
+    println!("timeline_tweets: {:?}", timeline_tweets);
+    HttpResponse::Ok().body(format!("This is a test page: {:?}", "nothing"))
 }

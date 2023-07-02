@@ -8,7 +8,7 @@ pub struct TweetModel {
     pub parent_id: Option<i32>,
     pub content: String,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub likes: i32,
+    pub reactions: i32,
     pub retweets: i32,
     pub quotes: i32,
     pub views: i32,

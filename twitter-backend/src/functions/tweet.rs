@@ -1,7 +1,98 @@
-use async_recursion::async_recursion;
+use crate::{
+    config::AppState, errors::auth::AuthError, errors::auth::ErrorResponse,
+    responses::tweet::{CreateTweetModelResponse, TimelineTweets}, schema::reaction::ReactionModel,
+    schema::{tweet::TweetModel, user::UserId, reaction::ImplicitRating}, functions::user::user_from_username,
+};
 use actix_web::web;
+use async_recursion::async_recursion;
 
-use crate::{responses::tweet::CreateTweetModelResponse, config::AppState, errors::auth::AuthError, schema::tweet::TweetModel};
+pub async fn reaction_from_username_tweet_id(
+    username: String,
+    tweet_id: i32,
+    data: &web::Data<AppState>,
+) -> Option<ReactionModel> {
+    let option_reaction = sqlx::query_as!(
+        ReactionModel,
+        "SELECT reaction_id, tweet_id, username, created_at
+        FROM REACTIONS 
+        WHERE tweet_id = ? AND username = ?",
+        tweet_id,
+        username
+    )
+    .fetch_optional(&data.db)
+    .await;
+    // println!("{:?}", option_reaction);
+    match option_reaction {
+        Ok(reaction) => reaction,
+        Err(_) => None,
+    }
+}
+
+pub async fn create_or_remove_reaction(
+    username: String,
+    tweet_id: i32,
+    reaction_id: i32,
+    data: web::Data<AppState>,
+) -> ErrorResponse {
+    if let Some(_tweet) = tweet_from_tweet_id(tweet_id, &data).await {
+        if let Some(_user) =
+            crate::functions::user::user_from_username(username.clone(), &data).await
+        {
+            if let Some(_) =
+                reaction_from_username_tweet_id(username.clone(), tweet_id, &data).await
+            {
+                let delete_result = sqlx::query!(
+                    "DELETE FROM REACTIONS WHERE tweet_id = ? AND username = ?",
+                    tweet_id,
+                    username,
+                )
+                .execute(&data.db)
+                .await;
+                let _update_result = sqlx::query!(
+                    "UPDATE TWEETS
+                SET reactions = reactions - 1
+                WHERE tweet_id = ?;",
+                    tweet_id,
+                )
+                .execute(&data.db)
+                .await;
+
+                if let Ok(_) = delete_result {
+                    return ErrorResponse::NoError();
+                } else {
+                    return ErrorResponse::InternalServerError();
+                }
+            } else {
+                let insertion_result = sqlx::query!(
+                    "INSERT INTO REACTIONS (tweet_id, username, reaction_id) VALUES (?, ?, ?)",
+                    tweet_id,
+                    username,
+                    reaction_id,
+                )
+                .execute(&data.db)
+                .await;
+                let _update_result = sqlx::query!(
+                    "UPDATE TWEETS
+                SET reactions = reactions + 1
+                WHERE tweet_id = ?;",
+                    tweet_id,
+                )
+                .execute(&data.db)
+                .await;
+
+                if let Ok(_) = insertion_result {
+                    return ErrorResponse::NoError();
+                } else {
+                    return ErrorResponse::InternalServerError();
+                }
+            }
+        } else {
+            return ErrorResponse::InvalidCredentials();
+        }
+    } else {
+        return ErrorResponse::InvalidTweet();
+    }
+}
 
 pub async fn create_tweet(
     body: web::Json<CreateTweetModelResponse>,
@@ -52,7 +143,10 @@ pub async fn create_tweet(
     return AuthError::NoError;
 }
 
-pub async fn most_recent_tweet_from_username(username: String, data: &web::Data<AppState>) -> Option<TweetModel> {
+pub async fn most_recent_tweet_from_username(
+    username: String,
+    data: &web::Data<AppState>,
+) -> Option<TweetModel> {
     let option_tweet = sqlx::query_as!(
         TweetModel,
         "SELECT 
@@ -61,7 +155,7 @@ pub async fn most_recent_tweet_from_username(username: String, data: &web::Data<
         parent_id,
         content,
         created_at,
-        likes,
+        reactions,
         retweets,
         quotes,
         views,
@@ -80,7 +174,7 @@ pub async fn most_recent_tweet_from_username(username: String, data: &web::Data<
 
     match option_tweet {
         Ok(_) => {
-            return Option::from(option_tweet.unwrap().last().unwrap()).cloned();
+            return Option::from(option_tweet.unwrap().last().unwrap().clone());
         }
         Err(_) => {
             return None;
@@ -88,7 +182,10 @@ pub async fn most_recent_tweet_from_username(username: String, data: &web::Data<
     }
 }
 
-pub async fn all_tweets_quoting_tweetid(tweet_id: i32, data: &web::Data<AppState>) -> Option<Vec<TweetModel>> {
+pub async fn all_tweets_quoting_tweetid(
+    tweet_id: i32,
+    data: &web::Data<AppState>,
+) -> Option<Vec<TweetModel>> {
     let option_tweets: Result<Vec<TweetModel>, sqlx::Error> = sqlx::query_as!(
         TweetModel,
         "SELECT 
@@ -97,7 +194,7 @@ pub async fn all_tweets_quoting_tweetid(tweet_id: i32, data: &web::Data<AppState
         parent_id,
         content,
         created_at,
-        likes,
+        reactions,
         retweets,
         quotes,
         views,
@@ -124,7 +221,80 @@ pub async fn all_tweets_quoting_tweetid(tweet_id: i32, data: &web::Data<AppState
     }
 }
 
-pub async fn all_tweets_replying2_tweetid(tweet_id: i32, data: &web::Data<AppState>) -> Option<Vec<TweetModel>> {
+use std::fs::File;
+use std::io::prelude::*;
+pub async fn timeline_for_user(
+    username: String,
+    data: &web::Data<AppState>,
+    ) -> Option<Vec<TimelineTweets>> {
+    let mut result = Vec::new();
+    println!("entered timeline_for_user...");
+   let user_id: Result<UserId, sqlx::Error> = sqlx::query_as!(
+    UserId,
+    "SELECT user_id FROM USERS WHERE USERS.username = ?",
+    username.clone()
+)
+.fetch_one(&data.db)
+.await;
+    let user_id = user_id.unwrap().user_id as usize; 
+
+    let option_implicit_ratings: Result<Vec<ImplicitRating>, sqlx::Error> = sqlx::query_as(
+        "SELECT
+        user_id,
+        tweet_id
+        FROM REACTIONS, USERS WHERE REACTIONS.username = USERS.username;"
+    )
+    .fetch_all(&data.db) 
+    .await;
+    let tweets_without_reactions: Result<Vec<(i32,)>, _>= sqlx::query_as::<_, (i32,)>(
+        "SELECT tweet_id FROM TWEETS WHERE TWEETS.reactions = 0;"
+    )
+    .fetch_all(&data.db)
+    .await;
+    for id in tweets_without_reactions.unwrap() {
+        result.push(
+            TimelineTweets { tweet_id: id.0, rating: 0 }
+            )
+    }
+    let mut csv_content = String::new();
+    csv_content.push_str("user_id,item_id\n");
+    let implicit_ratings = option_implicit_ratings.unwrap();
+    for rating in &implicit_ratings {
+        let rating_csv = format!("{},{}\n", rating.user_id, rating.tweet_id);
+        csv_content.push_str(&rating_csv);
+    }
+    // Create a temporary file
+    let temp_file = String::from("implicit-ratings-")+&username+".csv";
+    let temp_file = temp_file.as_str();
+    let mut file = File::create(temp_file).expect("Failed to create temporary file");
+    // Write the CSV content to the file
+    file.write_all(csv_content.as_bytes())
+    .expect("Failed to write CSV content to file");
+    // Pass the file to the recommendations function
+   
+    let file = File::open(temp_file).unwrap(); 
+    let actual = rucommender::recommendations(file).unwrap();
+    let recommendations =  actual.get(&(user_id as u32)).unwrap();
+    // Delete the temporary file
+    std::fs::remove_file(temp_file).expect("Failed to delete temporary file");
+    for (key,value) in recommendations.iter() {
+        result.push(
+            TimelineTweets {
+                tweet_id: *key as i32,
+                rating: *value as i32,
+            }
+            )
+        // println!("key: {:?}, value: {:?}", key, value);
+    }
+
+    
+    Option::from(result)
+}
+
+pub async fn all_tweets_replying2_tweetid(
+    tweet_id: i32,
+    data: &web::Data<AppState>,
+) -> Option<Vec<TweetModel>> {
     let option_tweets: Result<Vec<TweetModel>, sqlx::Error> = sqlx::query_as!(
         TweetModel,
         "SELECT 
@@ -133,7 +303,7 @@ pub async fn all_tweets_replying2_tweetid(tweet_id: i32, data: &web::Data<AppSta
         parent_id,
         content,
         created_at,
-        likes,
+        reactions,
         retweets,
         quotes,
         views,
@@ -174,7 +344,7 @@ pub async fn parent_tweet_chain_from_tweetid(
             parent_id,
             content,
             created_at,
-            likes,
+            reactions,
             retweets,
             quotes,
             views,
@@ -218,7 +388,7 @@ pub async fn tweet_from_tweet_id(tweet_id: i32, data: &web::Data<AppState>) -> O
         parent_id,
         content,
         created_at,
-        likes,
+        reactions,
         retweets,
         quotes,
         views,
@@ -251,7 +421,7 @@ pub async fn tweet_quoted(quote_id: i32, data: &web::Data<AppState>) -> Option<T
         parent_id,
         content,
         created_at,
-        likes,
+        reactions,
         retweets,
         quotes,
         views,
@@ -277,3 +447,4 @@ pub async fn tweet_quoted(quote_id: i32, data: &web::Data<AppState>) -> Option<T
         }
     }
 }
+
