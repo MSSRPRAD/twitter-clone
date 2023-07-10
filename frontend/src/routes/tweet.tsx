@@ -37,6 +37,7 @@ export default function ViewTweet() {
   const setStuff = (quoteTweets: {[key: number]: Tweet}, replies: Tweet[], parentChain: Tweet[], profile_pics: { [key: number]: String }, tweet: Tweet) => {
     setQuoteTweets(quoteTweets);
     setReplies(replies);
+    parentChain.shift();
     setParentChain(parentChain);
     setProfilePics(profile_pics);
     const arr: Tweet[] = [];
