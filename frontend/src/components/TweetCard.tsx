@@ -10,7 +10,7 @@ type TweetCardProps  = {
 export default function TweetCard(props: TweetCardProps) {
     return (
     <div>
-        <article class="transition duration-350 ease-in-out border-stone-100 border-2 border-b-0 border-r-0 shadow-sm">
+        <article class="transition duration-350 ease-in-out border-stone-100 border-2 shadow-sm">
                             <div class="flex flex-shrink-0 p-4 pb-0">
                                 <a href="#" class="flex-shrink-0 group block">
                                     <div class="flex items-center">
@@ -32,9 +32,14 @@ export default function TweetCard(props: TweetCardProps) {
 
 
                             <div class="pl-16">
+
+                                <a href={'http://localhost:3000/tweet/'+props.tweet?.tweet_id}>
+
                                 <p class="m-2 text-base width-auto font-medium text-white flex-shrink">
                                     {props.tweet?.content}
                                 </p>
+
+                                </a>
 
                                 {/* <div class="md:flex-shrink pr-6 pt-3">
                     <div class="bg-cover bg-no-repeat bg-center rounded-lg w-full h-64" style="height: 200px; background-image: url(https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=448&amp;q=80);">
