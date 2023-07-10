@@ -1,12 +1,14 @@
-use crate::functions::following::get_following_details_response;
-use crate::{functions::user::user_from_username, functions::following::create_or_update_following};
-use crate::errors::auth::{ErrorResponse, AuthError};
-use actix_session::Session;
-use crate::config::AppState;
-use actix_web::{get, web, HttpRequest, HttpResponse, Responder, post};
-use serde_json::json;
 use crate::authentication::middleware::SessionValue;
-use crate::responses::following::{FollowingModelResponse, FollowingDetailsResponse};
+use crate::config::AppState;
+use crate::errors::auth::{AuthError, ErrorResponse};
+use crate::functions::following::get_following_details_response;
+use crate::responses::following::{FollowingDetailsResponse, FollowingModelResponse};
+use crate::{
+    functions::following::create_or_update_following, functions::user::user_from_username,
+};
+use actix_session::Session;
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use serde_json::json;
 
 #[get("/follow/{username}")]
 async fn follow_username(
@@ -22,7 +24,7 @@ async fn follow_username(
     println!("logged in: {:?}", user);
     if let Some(_x) = &user {
         let req_username = &user.unwrap().username;
-        match user_from_username(req_username.to_string(), &data).await{
+        match user_from_username(req_username.to_string(), &data).await {
             None => {
                 let response_json = serde_json::json!(ErrorResponse::InvalidUser());
                 return HttpResponse::NotFound().json(response_json);
@@ -49,8 +51,7 @@ async fn follow_username(
     } else {
         let response_json = json!(ErrorResponse::NotLoggedIn());
         return HttpResponse::Unauthorized().json(response_json);
-    } 
-
+    }
 }
 
 #[get("/followdetails/{username}")]
@@ -81,7 +82,9 @@ pub async fn user_me(
                         return HttpResponse::NotFound().json(json_response);
                     }
                     _ => {
-                        let FollowingDetailsResponse = get_following_details_response(requested_username, &username, data).await;
+                        let FollowingDetailsResponse =
+                            get_following_details_response(requested_username, &username, data)
+                                .await;
                         let json_response = json!(FollowingDetailsResponse);
                         return HttpResponse::Ok().json(json_response);
                     }
@@ -89,8 +92,8 @@ pub async fn user_me(
             }
         }
     } else {
-       let json_response = json!(ErrorResponse::NotLoggedIn());
-       return HttpResponse::Unauthorized().json(json_response);
+        let json_response = json!(ErrorResponse::NotLoggedIn());
+        return HttpResponse::Unauthorized().json(json_response);
     }
 
     HttpResponse::Ok().json(json!({"status": "success"}))

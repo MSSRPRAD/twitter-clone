@@ -4,4 +4,3 @@ pub mod reaction;
 pub mod role;
 pub mod tweet;
 pub mod user;
-

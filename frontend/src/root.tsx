@@ -18,7 +18,7 @@ import "./root.css";
 import Register from "./routes/register";
 import Login from "./routes/login";
 import User from "./routes/user";
-
+import Timeline from "./routes/timeline.tsx";
 export default function Root() {
   const location = useLocation();
   const active = (path: string) =>
@@ -53,6 +53,7 @@ export default function Root() {
               <Route path = "/register" component={Register}/>
               <Route path = "/login" component={Login}/>
               <Route path="/users/:username" component={User} />
+              <Route path="/timeline/me" component={Timeline} />
             </Routes>
           </ErrorBoundary>
         </Suspense>
