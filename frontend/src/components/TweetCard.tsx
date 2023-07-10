@@ -1,5 +1,6 @@
+import { createSignal } from "solid-js";
 import Tweet from "../types/Tweet"
-
+import CreateTweetCard from "./CreateTweetCard"
 type TweetCardProps  = {
     tweet : Tweet | null;
     profileUrl : string | null;
@@ -8,6 +9,7 @@ type TweetCardProps  = {
 }
 
 export default function TweetCard(props: TweetCardProps) {
+    const [showCTCard, setShowCTCard] = createSignal(false);
     return (
     <div>
         <article class="transition duration-350 ease-in-out border-stone-100 border-2 shadow-sm">
@@ -60,7 +62,7 @@ export default function TweetCard(props: TweetCardProps) {
                                 </div>
 
 
-                                <div class="flex items-center py-4">
+            <div class="flex items-center py-4" onclick={()=> setShowCTCard(x=>!x)}>
                                     <div class="flex-1 flex items-center text-xs text-gray-400 hover:text-blue-400 transition duration-350 ease-in-out">
                                         <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mr-2">
                                             <g>
@@ -97,6 +99,10 @@ export default function TweetCard(props: TweetCardProps) {
                             </div>
                             <hr class="border-gray-800" />
                         </article>
-    </div>
+                        {showCTCard()? (
+                            <CreateTweetCard parent_id={props.tweet?.tweet_id} quote_id ={null} content={""} />
+                        ): null}
+
+                        </div>
   )
 }
