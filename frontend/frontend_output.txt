@@ -1,0 +1,32 @@
+
+> dev
+> solid-start dev
+
+ solid-start dev 
+ version  0.2.26
+ adapter  node
+
+  VITE v4.3.9  ready in 508 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: use --host to expose
+  ➜  Inspect: http://localhost:3000/__inspect/
+
+  ➜  Page Routes:
+     ┌─ http://localhost:3000/*404
+     ├─ http://localhost:3000/about
+     ├─ http://localhost:3000/home
+     ├─ http://localhost:3000/login
+     ├─ http://localhost:3000/register
+     ├─ http://localhost:3000/test
+     └─ http://localhost:3000/user
+
+  ➜  API Routes:
+     None! 👻
+
+GET http://localhost:3000/users/mssrprad
+GET http://localhost:3000/
+GET http://localhost:3000/register
+GET http://localhost:3000/register
+GET http://localhost:3000/register
+GET http://localhost:3000/register
