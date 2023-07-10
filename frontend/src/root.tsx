@@ -19,6 +19,7 @@ import Register from "./routes/register";
 import Login from "./routes/login";
 import User from "./routes/user";
 import Timeline from "./routes/timeline.tsx";
+import ViewTweet from "./routes/tweet.tsx";
 export default function Root() {
   const location = useLocation();
   const active = (path: string) =>
@@ -54,6 +55,7 @@ export default function Root() {
               <Route path = "/login" component={Login}/>
               <Route path="/users/:username" component={User} />
               <Route path="/timeline/me" component={Timeline} />
+              <Route path="/tweet/:tweet_id" component={ViewTweet} />
             </Routes>
           </ErrorBoundary>
         </Suspense>

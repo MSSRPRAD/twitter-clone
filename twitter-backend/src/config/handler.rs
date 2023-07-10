@@ -8,7 +8,10 @@ use crate::routes::{
     profile_routes::{
         profile_me, profile_username, tweets, tweets_images, tweets_likes, tweets_with_replies,
     },
-    tweet_routes::view_tweet,
+    tweet_routes::{
+        view_tweet,
+        tweet_chain_tweetid,
+    }
 };
 use actix_web::web;
 
@@ -33,6 +36,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(tweet_me)
         .service(test_route)
         .service(get_quoted)
+        .service(tweet_chain_tweetid)
         .service(timeline_from_username)
         .service(logout);
     conf.service(scope);

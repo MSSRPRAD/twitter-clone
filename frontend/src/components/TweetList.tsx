@@ -32,7 +32,7 @@ export default function TweetList(props: TweetListProps) {
         <div>
             <ul>
                 {props.tweets.map((tweet) => (
-                    <li>
+                                        <li>
                         <TweetCard
                             tweet={tweet}
                             profileUrl={tweet.profileUrl ? props.profileUrl : props.profile_pics[tweet.tweet_id]}
