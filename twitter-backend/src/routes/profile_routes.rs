@@ -68,8 +68,8 @@ pub async fn profile_me(
             }
         }
     } else {
-       let json_response = json!(ErrorResponse::NotLoggedIn());
-       return HttpResponse::Unauthorized().json(json_response);
+        let json_response = json!(ErrorResponse::NotLoggedIn());
+        return HttpResponse::Unauthorized().json(json_response);
     }
 
     HttpResponse::Ok().json(json!({"status": "success"}))

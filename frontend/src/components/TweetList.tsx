@@ -4,6 +4,7 @@ type TweetListProps = {
     tweets: Tweet[];
     profileUrl: string | null;
     quote_tweets: { [key: number]: Tweet};
+    profile_pics: { [key: number]: String };
 };
 
 type Tweet = {
@@ -21,10 +22,12 @@ type Tweet = {
 };
 
 export default function TweetList(props: TweetListProps) {
-    console.log("tweetcard props - tweets");
-    console.log(props.tweets);
+    // console.log("tweetcard props - tweets");
+    // console.log(props.tweets);
     // console.log("tweetcard props - quote_tweets");
     // console.log(props.quote_tweets);
+    console.log("tweetcard props - profilepicurls");
+    console.log(props.profile_pics.toString());
     return (
         <div>
             <ul>
@@ -32,13 +35,17 @@ export default function TweetList(props: TweetListProps) {
                     <li>
                         <TweetCard
                             tweet={tweet}
-                            profileUrl={props.profileUrl}
+                            profileUrl={tweet.profileUrl ? props.profileUrl : props.profile_pics[tweet.tweet_id]}
                             quotedTweet={
                                 tweet.quote_id && props.quote_tweets[tweet.quote_id]
                                   ? props.quote_tweets[tweet.quote_id]
                                   : null
                             }
-                            quotedTweetProfileUrl={""}
+                            quotedTweetProfileUrl={
+                                tweet.quote_id && props.profile_pics[tweet.quote_id]
+                                ? props.profile_pics[tweet.quote_id]
+                                : null
+                            }
                         />
                     </li>
                 ))}

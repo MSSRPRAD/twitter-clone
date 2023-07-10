@@ -4,7 +4,7 @@ use serde_derive::{Deserialize, Serialize};
 #[derive(Debug, Deserialize)]
 pub struct FollowingModelResponse {
     pub username: String,
-    pub following: String
+    pub following: String,
 }
 
 #[allow(non_snake_case)]
@@ -16,5 +16,4 @@ pub struct FollowingDetailsResponse {
     pub is_followed: bool,
     pub no_of_followers: i32,
     pub no_of_following: i32,
-
 }

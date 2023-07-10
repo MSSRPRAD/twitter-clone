@@ -1,7 +1,11 @@
 use crate::{
-    config::AppState, errors::auth::AuthError, errors::auth::ErrorResponse,
-    responses::tweet::{CreateTweetModelResponse, TimelineTweets}, schema::reaction::ReactionModel,
-    schema::{tweet::TweetModel, user::UserId, reaction::ImplicitRating}, functions::user::user_from_username,
+    config::AppState,
+    errors::auth::AuthError,
+    errors::auth::ErrorResponse,
+    functions::user::user_from_username,
+    responses::tweet::{CreateTweetModelResponse, TimelineTweets},
+    schema::reaction::ReactionModel,
+    schema::{reaction::ImplicitRating, tweet::TweetModel, user::UserId},
 };
 use actix_web::web;
 use async_recursion::async_recursion;
@@ -226,35 +230,35 @@ use std::io::prelude::*;
 pub async fn timeline_for_user(
     username: String,
     data: &web::Data<AppState>,
-    ) -> Option<Vec<TimelineTweets>> {
+) -> Option<Vec<TimelineTweets>> {
     let mut result = Vec::new();
     println!("entered timeline_for_user...");
-   let user_id: Result<UserId, sqlx::Error> = sqlx::query_as!(
-    UserId,
-    "SELECT user_id FROM USERS WHERE USERS.username = ?",
-    username.clone()
-)
-.fetch_one(&data.db)
-.await;
-    let user_id = user_id.unwrap().user_id as usize; 
+    let user_id: Result<UserId, sqlx::Error> = sqlx::query_as!(
+        UserId,
+        "SELECT user_id FROM USERS WHERE USERS.username = ?",
+        username.clone()
+    )
+    .fetch_one(&data.db)
+    .await;
+    let user_id = user_id.unwrap().user_id as usize;
 
     let option_implicit_ratings: Result<Vec<ImplicitRating>, sqlx::Error> = sqlx::query_as(
         "SELECT
         user_id,
         tweet_id
-        FROM REACTIONS, USERS WHERE REACTIONS.username = USERS.username;"
-    )
-    .fetch_all(&data.db) 
-    .await;
-    let tweets_without_reactions: Result<Vec<(i32,)>, _>= sqlx::query_as::<_, (i32,)>(
-        "SELECT tweet_id FROM TWEETS WHERE TWEETS.reactions = 0;"
+        FROM REACTIONS, USERS WHERE REACTIONS.username = USERS.username;",
     )
     .fetch_all(&data.db)
     .await;
+    let tweets_without_reactions: Result<Vec<(i32,)>, _> =
+        sqlx::query_as::<_, (i32,)>("SELECT tweet_id FROM TWEETS WHERE TWEETS.reactions = 0;")
+            .fetch_all(&data.db)
+            .await;
     for id in tweets_without_reactions.unwrap() {
-        result.push(
-            TimelineTweets { tweet_id: id.0, rating: 0 }
-            )
+        result.push(TimelineTweets {
+            tweet_id: id.0,
+            rating: 0,
+        })
     }
     let mut csv_content = String::new();
     csv_content.push_str("user_id,item_id\n");
@@ -264,30 +268,27 @@ pub async fn timeline_for_user(
         csv_content.push_str(&rating_csv);
     }
     // Create a temporary file
-    let temp_file = String::from("implicit-ratings-")+&username+".csv";
+    let temp_file = String::from("implicit-ratings-") + &username + ".csv";
     let temp_file = temp_file.as_str();
     let mut file = File::create(temp_file).expect("Failed to create temporary file");
     // Write the CSV content to the file
     file.write_all(csv_content.as_bytes())
-    .expect("Failed to write CSV content to file");
+        .expect("Failed to write CSV content to file");
     // Pass the file to the recommendations function
-   
-    let file = File::open(temp_file).unwrap(); 
+
+    let file = File::open(temp_file).unwrap();
     let actual = rucommender::recommendations(file).unwrap();
-    let recommendations =  actual.get(&(user_id as u32)).unwrap();
+    let recommendations = actual.get(&(user_id as u32)).unwrap();
     // Delete the temporary file
     std::fs::remove_file(temp_file).expect("Failed to delete temporary file");
-    for (key,value) in recommendations.iter() {
-        result.push(
-            TimelineTweets {
-                tweet_id: *key as i32,
-                rating: *value as i32,
-            }
-            )
+    for (key, value) in recommendations.iter() {
+        result.push(TimelineTweets {
+            tweet_id: *key as i32,
+            rating: *value as i32,
+        })
         // println!("key: {:?}, value: {:?}", key, value);
     }
 
-    
     Option::from(result)
 }
 
@@ -447,4 +448,3 @@ pub async fn tweet_quoted(quote_id: i32, data: &web::Data<AppState>) -> Option<T
         }
     }
 }
-

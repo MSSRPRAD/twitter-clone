@@ -1,8 +1,8 @@
-use crate::{errors::auth::AuthError, responses::following::FollowingDetailsResponse};
-use crate::responses::following::FollowingModelResponse;
-use crate::schema::following::{FollowingModel, number};
 use crate::config::AppState;
-use actix_web::{web};
+use crate::responses::following::FollowingModelResponse;
+use crate::schema::following::{number, FollowingModel};
+use crate::{errors::auth::AuthError, responses::following::FollowingDetailsResponse};
+use actix_web::web;
 
 pub async fn create_or_update_following(
     body: FollowingModelResponse,
@@ -35,8 +35,14 @@ pub async fn get_following_details_response(
     requesting_username: &str,
     data: web::Data<AppState>,
 ) -> FollowingDetailsResponse {
-
-    let mut details: FollowingDetailsResponse = FollowingDetailsResponse { requesting: requesting_username.to_string(), requested: requested_username.to_string(), following: true, is_followed: true, no_of_followers: 0, no_of_following: 0 };
+    let mut details: FollowingDetailsResponse = FollowingDetailsResponse {
+        requesting: requesting_username.to_string(),
+        requested: requested_username.to_string(),
+        following: true,
+        is_followed: true,
+        no_of_followers: 0,
+        no_of_following: 0,
+    };
 
     let option_requesting_follows_requested = sqlx::query_as!(
         FollowingModel,
@@ -55,7 +61,7 @@ pub async fn get_following_details_response(
     .await;
     match option_requesting_follows_requested {
         Ok(_) => {
-            // If it does, do nothing            
+            // If it does, do nothing
         }
         Err(_) => {
             details.following = false;
@@ -79,7 +85,7 @@ pub async fn get_following_details_response(
     .await;
     match option_requested_follows_requesting {
         Ok(_) => {
-            // If it does, do nothing            
+            // If it does, do nothing
         }
         Err(_) => {
             details.is_followed = false;
@@ -100,7 +106,7 @@ pub async fn get_following_details_response(
     match option_requested_follows_requesting {
         Ok(_) => {
             // If it does, do nothing
-            details.no_of_following = no_following.unwrap().number as i32;            
+            details.no_of_following = no_following.unwrap().number as i32;
         }
         Err(_) => {
             // details.is_followed = false;
@@ -121,7 +127,7 @@ pub async fn get_following_details_response(
     match option_requested_follows_requesting {
         Ok(_) => {
             // If it does, do nothing
-            details.no_of_followers = no_following.unwrap().number as i32;            
+            details.no_of_followers = no_following.unwrap().number as i32;
         }
         Err(_) => {
             // details.is_followed = false;

@@ -1,14 +1,14 @@
 use crate::routes::auth_routes::{get_me_handler, login_post, logout, register_post};
-use crate::routes::follow_routes::{user_me};
+use crate::routes::follow_routes::user_me;
 use crate::routes::test_routes::test_route;
-use crate::routes::tweet_routes::{view_tweet_user, tweet_me, get_quoted, timeline_from_username};
+use crate::routes::tweet_routes::{get_quoted, timeline_from_username, tweet_me, view_tweet_user};
 use crate::routes::{
     auth_routes::{allusers, login, register},
+    follow_routes::follow_username,
     profile_routes::{
         profile_me, profile_username, tweets, tweets_images, tweets_likes, tweets_with_replies,
     },
     tweet_routes::view_tweet,
-    follow_routes::follow_username,
 };
 use actix_web::web;
 

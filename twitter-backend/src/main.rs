@@ -55,7 +55,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let cors = Cors::permissive();
-            // .supports_credentials();
+        // .supports_credentials();
         App::new()
             // redis session middleware
             .wrap(

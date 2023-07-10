@@ -5,7 +5,7 @@ use serde_derive::Deserialize;
 pub struct FollowingModel {
     pub username: String,
     pub following: String,
-    pub created_at: Option<chrono::DateTime<chrono::Utc>>
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[allow(non_snake_case)]
@@ -19,4 +19,3 @@ pub struct followers {
 pub struct number {
     pub number: i64,
 }
-

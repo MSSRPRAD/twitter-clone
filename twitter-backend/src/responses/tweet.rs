@@ -29,7 +29,6 @@ pub struct TimelineTweets {
     pub rating: i32,
 }
 
-
 pub fn make_tweet_model_response(tweet: &TweetModel) -> TweetModelResponse {
     TweetModelResponse {
         username: tweet.username.to_owned(),
