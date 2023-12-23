@@ -3,7 +3,7 @@ use crate::routes::follow_routes::user_me;
 use crate::routes::test_routes::test_route;
 use crate::routes::tweet_routes::{get_quoted, timeline_from_username, tweet_me, view_tweet_user};
 use crate::routes::{
-    auth_routes::{allusers, login, register},
+    auth_routes::{login, register},
     follow_routes::follow_username,
     profile_routes::{
         profile_me, profile_username, tweets, tweets_images, tweets_likes, tweets_with_replies,
@@ -11,7 +11,8 @@ use crate::routes::{
     tweet_routes::{
         view_tweet,
         tweet_chain_tweetid,
-    }
+    },
+    test_routes::{allusers}
 };
 use actix_web::web;
 

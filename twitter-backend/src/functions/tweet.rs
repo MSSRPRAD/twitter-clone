@@ -9,6 +9,7 @@ use crate::{
 };
 use actix_web::web;
 use async_recursion::async_recursion;
+use sqlx::Row;
 
 pub async fn reaction_from_username_tweet_id(
     username: String,
@@ -413,6 +414,36 @@ pub async fn tweet_from_tweet_id(tweet_id: i32, data: &web::Data<AppState>) -> O
     }
 }
 
+pub async fn tweets_from_username(username: &str, data: &web::Data<AppState>) -> Vec<TweetModel> {
+    let tweets: Vec<TweetModel> =sqlx::query_as!(
+        TweetModel,
+        "
+    SELECT 
+        tweet_id,
+        username,
+        parent_id,
+        content, 
+        created_at,
+        reactions,
+        quote_id,
+        quotes,
+        replies,
+        retweets,
+        views
+    FROM TWEETS
+    WHERE 
+    username = ?
+    ORDER BY
+    created_at DESC;",
+        username
+    )
+    .fetch_all(&data.db)
+    .await
+    .unwrap();
+
+    return tweets;
+}
+
 pub async fn tweet_quoted(quote_id: i32, data: &web::Data<AppState>) -> Option<TweetModel> {
     let option_tweet: Result<TweetModel, sqlx::Error> = sqlx::query_as!(
         TweetModel,
@@ -447,4 +478,33 @@ pub async fn tweet_quoted(quote_id: i32, data: &web::Data<AppState>) -> Option<T
             return None;
         }
     }
+}
+
+
+pub async fn tweet_with_tweetid_username(username: &str , tweet_id: i32, data: &web::Data<AppState>) -> Result<TweetModel, sqlx::Error> {
+    
+    let tweet = sqlx::query_as!(
+        TweetModel,
+        "
+    SELECT 
+        tweet_id,
+        username,
+        parent_id,
+        content, 
+        created_at,
+        reactions,
+        quote_id,
+        quotes,
+        replies,
+        retweets,
+        views
+    FROM TWEETS
+    WHERE 
+    tweet_id = ?;",
+        tweet_id
+    )
+    .fetch_one(&data.db)
+    .await;
+
+    return tweet;
 }

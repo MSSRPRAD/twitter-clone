@@ -23,3 +23,27 @@ pub async fn user_from_username(username: String, data: &web::Data<AppState>) ->
         }
     }
 }
+
+pub async fn get_all_users(data: &web::Data<AppState>) -> Vec<UserModel> {
+    let all_users = sqlx::query_as!(
+        UserModel,
+        r#"SELECT 
+            name,
+            role_id, 
+            username, 
+            email, 
+            created_at, 
+            dob, 
+            password 
+        FROM 
+            USERS
+        ORDER BY
+            created_at
+        ;"#
+    )
+    .fetch_all(&data.db)
+    .await
+    .unwrap_or(Vec::new());
+
+    return all_users
+}
