@@ -21,3 +21,10 @@ pub struct TweetModel {
 pub struct TweetCreateResponse {
     pub content: String,
 }
+
+pub enum TweetRequestType {
+    Tweets = 0,
+    TweetsWithReplies = 1,
+    Media = 2,
+    Likes = 3
+}

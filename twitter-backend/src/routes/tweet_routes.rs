@@ -1,26 +1,25 @@
 use crate::authentication::middleware::{user_exists, SessionValue};
 use crate::errors::auth::{AuthError, ErrorResponse};
-use crate::functions;
+use crate::functions::{self, tweet};
 use crate::functions::profile::profile_from_username;
 use crate::functions::tweet::{
-    create_tweet, most_recent_tweet_from_username, timeline_for_user, tweet_from_tweet_id,
-    tweet_quoted, parent_tweet_chain_from_tweetid, all_tweets_replying2_tweetid, tweets_from_username, tweet_with_tweetid_username,
+    create_tweet, most_recent_tweet_from_username, timeline_for_user, tweet_from_tweet_id, parent_tweet_chain_from_tweetid, all_tweets_replying2_tweetid, tweets_from_username_of_reqtype, tweet_with_tweetid_username,
 };
 use crate::functions::user::user_from_username;
 use crate::responses::{
     reaction::ReactionModelResponse,
     tweet::{make_tweet_model_response, CreateTweetModelResponse, TweetModelResponse},
 };
-use crate::schema::tweet::TweetModel;
-use crate::{config::AppState, functions::user};
+use crate::schema::tweet::{TweetModel, TweetRequestType};
+use crate::{config::AppState};
 use actix_session::Session;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use serde_json::json;
-use sqlx::{Error, Row};
+use sqlx::{Row};
 
 #[get("/twitter/timeline/me")]
 pub async fn timeline_from_username(
-    req: HttpRequest,
+    _req: HttpRequest,
     data: web::Data<AppState>,
     session: Session,
 ) -> HttpResponse {
@@ -139,7 +138,7 @@ pub async fn view_tweet(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
     let tweet = tweet_with_tweetid_username(&username, tweet_id, &data).await;
     // If the user already exists, return a Conflict response
     match tweet {
-        Result::Err(err) => {
+        Result::Err(_err) => {
             return HttpResponse::Conflict().json(
                 serde_json::json!({"status": "fail","message": "This combination of username and tweetid does not exist in database."}),
             );
@@ -197,15 +196,34 @@ pub async fn get_quoted(req: HttpRequest, data: web::Data<AppState>) -> HttpResp
     }
 }
 
-#[get("/twitter/{username}/tweets/all")]
+
+#[get("/twitter/{username}/tweets/{req_type}")]
 pub async fn view_tweet_user(req: HttpRequest, data: web::Data<AppState>) -> HttpResponse {
     let parts: Vec<&str> = req.path().split('/').collect();
     let username: String = parts[2].to_string();
+    let req_type: String = parts[4].to_string();
+    let tweet_req_type: TweetRequestType;
+    match &req_type as &str {
+        "tweets" => {
+            tweet_req_type = TweetRequestType::Tweets;
+        }, "tweets_with_replies" => {
+            tweet_req_type = TweetRequestType::TweetsWithReplies;
+        }, "media" => {
+            tweet_req_type = TweetRequestType::Media;
+        }, "likes" => {
+            tweet_req_type = TweetRequestType::Likes;
+        }
+        _ => {
+            return HttpResponse::BadRequest().json(
+                serde_json::json!({"status": "fail","message": "Bad Tweet Request Type"}),
+            );
+        }
+    }
     println!("username: {:?}", username);
     match user_exists(username.clone(), "foo@foo.com".to_string(), &data).await {
         AuthError::UserExistsError => {
-            let tweets: Vec<TweetModel> = tweets_from_username(&username, &data).await;
-            let mut tweet_responses = tweets
+            let tweets: Vec<TweetModel> = tweets_from_username_of_reqtype(&username, tweet_req_type, &data).await;
+            let tweet_responses = tweets
                 .into_iter()
                 .map(|tweet| make_tweet_model_response(&tweet))
                 .collect::<Vec<TweetModelResponse>>();
@@ -272,11 +290,11 @@ pub async fn tweet_chain_tweetid(req: HttpRequest, data: web::Data<AppState>) ->
             let tweet_curr = tweet1.clone();
             let parent_chain: Vec<TweetModel> = parent_tweet_chain_from_tweetid(tweet_id, None, &data).await.unwrap().unwrap();
             let replies: Vec<TweetModel> = all_tweets_replying2_tweetid(tweet_id, &data).await.unwrap();
-            let mut parent_chain_tweet_responses = parent_chain
+            let parent_chain_tweet_responses = parent_chain
                 .into_iter()
                 .map(|tweet| make_tweet_model_response(&tweet))
                 .collect::<Vec<TweetModelResponse>>();
-            let mut replies_tweet_responses = replies
+            let replies_tweet_responses = replies
                 .into_iter()
                 .map(|tweet| make_tweet_model_response(&tweet))
                 .collect::<Vec<TweetModelResponse>>();

@@ -107,7 +107,7 @@ export default function User() {
 
   async function fetch_tweets(username: string): Promise<UserTweetsResponse | null> {
   try {
-    const response = await fetch('http://localhost:8000/twitter/' + username + '/tweets/all', {
+    const response = await fetch('http://localhost:8000/twitter/' + username + '/tweets/tweets', {
       method: 'GET',
       credentials: "include",
     })

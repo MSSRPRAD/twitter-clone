@@ -6,7 +6,7 @@ use crate::routes::{
     auth_routes::{login, register},
     follow_routes::follow_username,
     profile_routes::{
-        profile_me, profile_username, tweets, tweets_images, tweets_likes, tweets_with_replies,
+        profile_me, profile_username,
     },
     tweet_routes::{
         view_tweet,
@@ -20,10 +20,6 @@ pub fn config(conf: &mut web::ServiceConfig) {
     let scope = web::scope("")
         .service(login)
         .service(register)
-        .service(tweets)
-        .service(tweets_images)
-        .service(tweets_likes)
-        .service(tweets_with_replies)
         .service(view_tweet)
         .service(allusers)
         .service(register_post)

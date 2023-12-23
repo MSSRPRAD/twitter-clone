@@ -4,10 +4,9 @@ use crate::authentication::middleware::{register_user, user_exists, SessionValue
 use crate::errors::auth::AuthError;
 use crate::errors::auth::ErrorResponse;
 use crate::functions::user::user_from_username;
-use crate::schema::user::{LoginUserSchema, RegisterUserSchema, UserModel};
+use crate::schema::user::{LoginUserSchema, RegisterUserSchema};
 use crate::{
     config::AppState,
-    responses::user::{make_user_model_response, UserModelResponse},
 };
 
 use actix_session::Session;

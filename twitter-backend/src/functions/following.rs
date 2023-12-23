@@ -6,6 +6,7 @@ use actix_web::web;
 
 pub async fn create_or_update_following(
     body: FollowingModelResponse,
+    delete: bool,
     data: web::Data<AppState>,
 ) -> AuthError {
     let _delete_result = sqlx::query_as!(
@@ -16,6 +17,9 @@ pub async fn create_or_update_following(
     )
     .execute(&data.db)
     .await;
+    if delete {
+        return AuthError::NoError;
+    }
     let _insert_result = sqlx::query_as!(
         FollowingModel,
         "INSERT INTO FOLLOWING

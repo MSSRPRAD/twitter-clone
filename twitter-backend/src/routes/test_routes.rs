@@ -1,9 +1,9 @@
 use actix_web::{get, web, HttpRequest, HttpResponse};
-use serde_json::json;
+
 
 use crate::{
     config::AppState,
-    functions::{self, tweet::timeline_for_user, user::get_all_users}, schema::user::UserModel, responses::user::{make_user_model_response, UserModelResponse},
+    functions::{tweet::timeline_for_user, user::get_all_users}, schema::user::UserModel, responses::user::{make_user_model_response, UserModelResponse},
 };
 
 #[get("/test/{username}")]
